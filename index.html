@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pawlogue — Understand what your cat or dog is really saying</title>
+<meta name="description" content="Pawlogue reads your pet's mood from their meows and barks, and learns the meanings you teach for your specific cat or dog. Honest by design. No fake sentences, no medical claims." />
+<meta property="og:title" content="Pawlogue — honest pet vocalization reader" />
+<meta property="og:description" content="Reads your pet's mood and the dictionary you teach. Cats and dogs. On-device and private." />
+<meta property="og:type" content="website" />
+<meta name="theme-color" content="#12100E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --ink:#12100E; --ink-2:#1b1814; --cream:#F2E8D5; --cream-dim:#cdbfa8;
+    --amber:#E8A657; --amber-soft:#f0c389; --teal:#2D8B7A; --teal-soft:#5bb3a2;
+    --line:rgba(242,232,213,.12); --maxw:1120px;
+    --sans:"Plus Jakarta Sans",-apple-system,system-ui,sans-serif;
+    --serif:"Fraunces",Georgia,serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--ink); color:var(--cream); font-family:var(--sans);
+    font-size:17px; line-height:1.6; -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  body::before{ /* warm grain + glow atmosphere */
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background:
+      radial-gradient(60vw 50vh at 78% -8%, rgba(232,166,87,.16), transparent 60%),
+      radial-gradient(55vw 45vh at 8% 12%, rgba(45,139,122,.12), transparent 60%);
+  }
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 24px; position:relative; z-index:1}
+  a{color:inherit; text-decoration:none}
+  .accent{color:var(--amber)}
+  .teal{color:var(--teal-soft)}
+
+  /* NAV */
+  nav{position:sticky; top:0; z-index:50; backdrop-filter:blur(10px);
+    background:rgba(18,16,14,.6); border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex; align-items:center; justify-content:space-between; height:68px}
+  .logo{display:flex; align-items:center; gap:11px; font-weight:800; letter-spacing:-.02em; font-size:20px}
+  .logo .mark{display:flex; align-items:flex-end; gap:3px; height:22px}
+  .logo .mark i{width:3px; border-radius:3px; background:var(--amber); display:block; animation:eq 1.6s ease-in-out infinite}
+  .logo .mark i:nth-child(1){height:8px; animation-delay:0s}
+  .logo .mark i:nth-child(2){height:18px; animation-delay:.2s; background:var(--amber-soft)}
+  .logo .mark i:nth-child(3){height:12px; animation-delay:.4s; background:var(--teal)}
+  .logo .mark i:nth-child(4){height:20px; animation-delay:.1s; background:var(--amber)}
+  @keyframes eq{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1)}}
+  .nav-links{display:flex; gap:30px; align-items:center; font-size:15px; color:var(--cream-dim)}
+  .nav-links a:hover{color:var(--cream)}
+  .btn{display:inline-block; background:var(--amber); color:#1a1206; font-weight:700;
+    padding:11px 20px; border-radius:999px; font-size:15px; transition:transform .15s ease, box-shadow .25s ease;
+    box-shadow:0 6px 22px rgba(232,166,87,.25)}
+  .btn:hover{transform:translateY(-2px); box-shadow:0 10px 30px rgba(232,166,87,.4)}
+  .btn.ghost{background:transparent; color:var(--cream); border:1px solid var(--line); box-shadow:none}
+  .btn.ghost:hover{border-color:var(--amber); color:var(--amber)}
+  @media(max-width:720px){.nav-links a:not(.btn){display:none}}
+
+  /* HERO */
+  header{padding:86px 0 70px; position:relative}
+  .eyebrow{display:inline-flex; align-items:center; gap:9px; font-size:13px; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--teal-soft); border:1px solid var(--line);
+    padding:7px 14px; border-radius:999px; margin-bottom:26px}
+  .eyebrow b{color:var(--amber); font-weight:700}
+  h1{font-family:var(--serif); font-weight:500; font-size:clamp(40px,6.4vw,76px); line-height:1.02;
+    letter-spacing:-.02em; max-width:16ch}
+  h1 em{font-style:italic; color:var(--amber)}
+  .sub{margin-top:24px; font-size:clamp(17px,2.1vw,21px); color:var(--cream-dim); max-width:54ch}
+  .reveal{opacity:0; transform:translateY(18px); animation:rise .9s cubic-bezier(.2,.7,.2,1) forwards}
+  .d1{animation-delay:.05s}.d2{animation-delay:.18s}.d3{animation-delay:.32s}.d4{animation-delay:.46s}.d5{animation-delay:.6s}
+  @keyframes rise{to{opacity:1; transform:none}}
+
+  /* WAITLIST */
+  form.wait{margin-top:38px; display:flex; gap:10px; max-width:480px; flex-wrap:wrap}
+  form.wait input{flex:1; min-width:220px; background:var(--ink-2); border:1px solid var(--line);
+    color:var(--cream); padding:15px 18px; border-radius:14px; font-size:16px; font-family:inherit}
+  form.wait input:focus{outline:none; border-color:var(--amber)}
+  form.wait button{border:none; cursor:pointer; font-family:inherit}
+  .wait-note{margin-top:13px; font-size:13.5px; color:var(--cream-dim)}
+  .ok{margin-top:18px; color:var(--teal-soft); font-weight:600; display:none}
+
+  /* big waveform signature */
+  .wavebox{margin-top:60px; display:flex; align-items:center; gap:5px; height:120px; opacity:.9}
+  .wavebox i{flex:1; max-width:9px; border-radius:6px; background:linear-gradient(var(--amber),var(--teal));
+    animation:wv 2.4s ease-in-out infinite; transform-origin:center}
+  @keyframes wv{0%,100%{transform:scaleY(.18)}50%{transform:scaleY(1)}}
+
+  section{padding:84px 0; position:relative}
+  .tag{font-size:13px; letter-spacing:.16em; text-transform:uppercase; color:var(--amber); font-weight:700}
+  h2{font-family:var(--serif); font-weight:500; font-size:clamp(28px,4vw,46px); line-height:1.08;
+    letter-spacing:-.01em; margin-top:14px; max-width:20ch}
+  .lead{color:var(--cream-dim); margin-top:18px; max-width:60ch; font-size:18px}
+
+  /* steps */
+  .steps{display:grid; grid-template-columns:repeat(3,1fr); gap:22px; margin-top:54px}
+  .card{background:linear-gradient(180deg,rgba(242,232,213,.04),rgba(242,232,213,.015));
+    border:1px solid var(--line); border-radius:20px; padding:30px 26px; position:relative; overflow:hidden}
+  .card .n{font-family:var(--serif); font-size:15px; color:var(--amber); font-weight:600}
+  .card h3{font-size:21px; margin:14px 0 10px; letter-spacing:-.01em}
+  .card p{color:var(--cream-dim); font-size:15.5px}
+  .card::after{content:""; position:absolute; right:-30px; top:-30px; width:120px; height:120px;
+    background:radial-gradient(circle,rgba(232,166,87,.14),transparent 70%)}
+  @media(max-width:760px){.steps{grid-template-columns:1fr}}
+
+  /* honest split */
+  .split{display:grid; grid-template-columns:1.05fr .95fr; gap:60px; align-items:center}
+  @media(max-width:860px){.split{grid-template-columns:1fr; gap:34px}}
+  .quote{font-family:var(--serif); font-style:italic; font-size:clamp(22px,3vw,30px); line-height:1.3}
+  .pills{display:flex; flex-wrap:wrap; gap:10px; margin-top:26px}
+  .pill{border:1px solid var(--line); border-radius:999px; padding:9px 16px; font-size:14px; color:var(--cream-dim)}
+  .pill b{color:var(--teal-soft)}
+  .honestcard{background:var(--ink-2); border:1px solid var(--line); border-radius:22px; padding:30px}
+  .row{display:flex; gap:13px; padding:15px 0; border-bottom:1px solid var(--line); align-items:flex-start}
+  .row:last-child{border:none}
+  .row .yes{color:var(--teal-soft); font-weight:800}
+  .row .no{color:#d98a6e; font-weight:800}
+  .row span{font-size:15.5px}
+
+  /* both */
+  .both{display:flex; gap:18px; flex-wrap:wrap; margin-top:30px}
+  .both .b{flex:1; min-width:260px; border:1px solid var(--line); border-radius:20px; padding:28px;
+    background:linear-gradient(180deg,rgba(242,232,213,.03),transparent)}
+  .both .b .ic{font-size:30px}
+  .both .b h3{font-size:20px; margin:12px 0 8px}
+  .both .b p{color:var(--cream-dim); font-size:15px}
+  .soon{font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--amber); border:1px solid var(--line); padding:3px 9px; border-radius:999px; margin-left:8px}
+
+  /* faq */
+  details{border-bottom:1px solid var(--line); padding:20px 0}
+  summary{cursor:pointer; list-style:none; font-size:18px; font-weight:600; display:flex; justify-content:space-between; gap:20px}
+  summary::-webkit-details-marker{display:none}
+  summary .pm{color:var(--amber); transition:transform .2s}
+  details[open] summary .pm{transform:rotate(45deg)}
+  details p{color:var(--cream-dim); margin-top:13px; max-width:70ch; font-size:15.5px}
+
+  /* cta */
+  .cta{text-align:center; background:linear-gradient(180deg,rgba(232,166,87,.07),transparent);
+    border:1px solid var(--line); border-radius:28px; padding:64px 24px; margin:30px 0 0}
+  .cta h2{margin:0 auto; max-width:24ch}
+  .cta form.wait{margin:34px auto 0; justify-content:center}
+
+  footer{border-top:1px solid var(--line); padding:54px 0 70px; margin-top:90px; color:var(--cream-dim)}
+  .foot{display:flex; justify-content:space-between; gap:30px; flex-wrap:wrap; align-items:flex-start}
+  .foot a{color:var(--cream-dim)} .foot a:hover{color:var(--amber)}
+  .foot .cols{display:flex; gap:54px; flex-wrap:wrap}
+  .foot h4{color:var(--cream); font-size:14px; margin-bottom:12px; letter-spacing:.04em}
+  .foot ul{list-style:none; font-size:14.5px; line-height:2}
+  .fine{margin-top:34px; font-size:13px; color:#7d7466; max-width:70ch}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap">
+  <a class="logo" href="#top"><span class="mark"><i></i><i></i><i></i><i></i></span>Pawlogue</a>
+  <div class="nav-links">
+    <a href="#how">How it works</a>
+    <a href="#honest">Why honest</a>
+    <a href="#faq">FAQ</a>
+    <a class="btn" href="#waitlist">Join the waitlist</a>
+  </div>
+</div></nav>
+
+<header id="top"><div class="wrap">
+  <span class="eyebrow reveal d1"><b>●</b> Cats &amp; dogs · iOS &amp; Android · coming soon</span>
+  <h1 class="reveal d2">Understand what your pet is <em>actually</em> saying.</h1>
+  <p class="sub reveal d3">Pawlogue listens to your cat or dog, reads their mood, and learns the meanings <strong>you</strong> teach for <strong>your</strong> pet. Not a toy that makes up sentences. An honest read of how they really feel.</p>
+
+  <form class="wait reveal d4" id="f1" onsubmit="return joinWaitlist(event,'f1')">
+    <input type="email" name="email" placeholder="you@email.com" required aria-label="Email" />
+    <button class="btn" type="submit">Get early access</button>
+    <div class="ok" id="ok-f1">Thanks. You're on the list. We'll write from hello@pawlogue.pet.</div>
+  </form>
+  <p class="wait-note reveal d4">No spam. One email when we open the beta.</p>
+
+  <div class="wavebox reveal d5" id="wave" aria-hidden="true"></div>
+</div></header>
+
+<section id="how"><div class="wrap">
+  <span class="tag">How it works</span>
+  <h2>Three steps, and it gets smarter about your pet every day.</h2>
+  <div class="steps">
+    <div class="card"><div class="n">Step 01</div><h3>Listen</h3><p>Open the app when your cat meows or your dog barks. Pawlogue captures the sound on your phone, in the moment.</p></div>
+    <div class="card"><div class="n">Step 02</div><h3>Read the mood</h3><p>You instantly see an honest read of their state: content, seeking attention, agitated, distressed, or a calm purr. With a confidence you can trust.</p></div>
+    <div class="card"><div class="n">Step 03</div><h3>Teach their dictionary</h3><p>Over a week or two you tag a handful of your pet's sounds. Pawlogue learns <em>your</em> pet's specific meanings, the door call, the food call, the hello.</p></div>
+  </div>
+</div></section>
+
+<section id="honest"><div class="wrap split">
+  <div>
+    <span class="tag">Why honest</span>
+    <p class="quote">There is no universal cat language. So we refuse to fake one.</p>
+    <p class="lead">The science is clear: cats and dogs do not share a fixed vocabulary, and a meow means different things from one cat to the next. What <em>is</em> readable is mood, and the patterns your own pet repeats with you. Pawlogue is built on exactly that, and nothing it cannot stand behind.</p>
+    <div class="pills">
+      <span class="pill"><b>On-device</b> by default</span>
+      <span class="pill"><b>No</b> fake sentences</span>
+      <span class="pill"><b>Not</b> medical advice</span>
+      <span class="pill"><b>Your data</b> stays yours</span>
+    </div>
+  </div>
+  <div class="honestcard">
+    <div class="row"><span class="yes">✓</span><span>Reads mood and arousal (calm, excited, distressed)</span></div>
+    <div class="row"><span class="yes">✓</span><span>Learns the meanings you teach for your specific pet</span></div>
+    <div class="row"><span class="yes">✓</span><span>Tells you when it is not sure, instead of guessing</span></div>
+    <div class="row"><span class="no">✕</span><span>Pretends your pet said a full human sentence</span></div>
+    <div class="row"><span class="no">✕</span><span>Diagnoses illness or replaces a vet</span></div>
+    <div class="row"><span class="no">✕</span><span>Sells your recordings to anyone</span></div>
+  </div>
+</div></section>
+
+<section id="pets"><div class="wrap">
+  <span class="tag">Built for both</span>
+  <h2>Start with your cat. Dogs are next.</h2>
+  <div class="both">
+    <div class="b"><div class="ic">🐱</div><h3>Cats</h3><p>Meow, purr, chirp, hiss, yowl. The meow your cat aims at you is a language they invented for you alone, and Pawlogue learns it.</p></div>
+    <div class="b"><div class="ic">🐶</div><h3>Dogs <span class="soon">v2</span></h3><p>Bark, whine, growl, howl. Dog vocal mood is even more readable across pets, and it is coming right after cats.</p></div>
+  </div>
+</div></section>
+
+<section id="faq"><div class="wrap">
+  <span class="tag">FAQ</span>
+  <h2>Straight answers.</h2>
+  <div style="margin-top:30px">
+    <details><summary>Does it translate barks and meows into words?<span class="pm">+</span></summary><p>No, and we will never pretend it does. Pawlogue reads mood, and the specific meanings you teach it for your own pet. Anyone claiming a literal word-for-word pet translator is selling you a toy.</p></details>
+    <details><summary>How does it learn my specific pet?<span class="pm">+</span></summary><p>Over the first week or two, the app groups your pet's sounds and asks you to name a few of them ("this one means hungry"). It takes about thirty quick taps, and the read keeps getting sharper as you go.</p></details>
+    <details><summary>Is my audio private?<span class="pm">+</span></summary><p>Yes. Sound is processed on your device by default. Nothing leaves your phone unless you opt in, and even then we share anonymized data only, never raw recordings, and never for sale.</p></details>
+    <details><summary>Is this veterinary or medical advice?<span class="pm">+</span></summary><p>No. Pawlogue can gently flag an unusual pattern worth a vet's attention, but it never diagnoses. If your pet seems unwell, see a veterinarian.</p></details>
+    <details><summary>What will it cost?<span class="pm">+</span></summary><p>A 30-day free trial, then $19 per year. One simple price. No ads.</p></details>
+    <details><summary>When can I use it?<span class="pm">+</span></summary><p>We are in build. Join the waitlist and you will be among the first into the beta, cats first.</p></details>
+  </div>
+</div></section>
+
+<section id="waitlist"><div class="wrap">
+  <div class="cta">
+    <span class="tag">Early access</span>
+    <h2>Be first to really hear your pet.</h2>
+    <form class="wait" id="f2" onsubmit="return joinWaitlist(event,'f2')">
+      <input type="email" name="email" placeholder="you@email.com" required aria-label="Email" />
+      <button class="btn" type="submit">Join the waitlist</button>
+      <div class="ok" id="ok-f2">Thanks. You're on the list.</div>
+    </form>
+  </div>
+</div></section>
+
+<footer><div class="wrap foot">
+  <div>
+    <a class="logo" href="#top"><span class="mark"><i></i><i></i><i></i><i></i></span>Pawlogue</a>
+    <p style="margin-top:14px;max-width:34ch;font-size:14.5px">An honest read of how your cat or dog really feels.</p>
+  </div>
+  <div class="cols">
+    <div><h4>Product</h4><ul>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#honest">Why honest</a></li>
+      <li><a href="#faq">FAQ</a></li>
+      <li><a href="#waitlist">Waitlist</a></li>
+    </ul></div>
+    <div><h4>Company</h4><ul>
+      <li><a href="/privacy.html">Privacy</a></li>
+      <li><a href="mailto:hello@pawlogue.pet">hello@pawlogue.pet</a></li>
+    </ul></div>
+  </div>
+</div>
+<div class="wrap"><p class="fine">Pawlogue reads pet mood and owner-taught patterns. It does not translate animal sounds into human language and is not a substitute for veterinary care. A product of Visanow AI, Inc. © <span id="yr"></span> Visanow AI, Inc. All rights reserved.</p></div>
+</footer>
+
+<script>
+  // build waveform bars
+  (function(){
+    var w=document.getElementById('wave'); if(!w) return;
+    var n=window.innerWidth<640?28:54;
+    for(var i=0;i<n;i++){var b=document.createElement('i');
+      b.style.animationDelay=(i*0.045)+'s';
+      b.style.animationDuration=(1.8+(i%5)*0.18)+'s';
+      w.appendChild(b);}
+  })();
+  document.getElementById('yr').textContent=new Date().getFullYear();
+  // waitlist: client-side confirm + store locally; swap action to Formspree/ConvertKit endpoint before launch
+  function joinWaitlist(e,id){
+    e.preventDefault();
+    var f=document.getElementById(id);
+    var email=f.querySelector('input').value;
+    try{var l=JSON.parse(localStorage.getItem('pawlogue_waitlist')||'[]');l.push({email:email,t:Date.now()});localStorage.setItem('pawlogue_waitlist',JSON.stringify(l));}catch(_){}
+    // TODO before launch: POST to real endpoint, e.g. fetch('https://formspree.io/f/XXXX',{method:'POST',body:new FormData(f)})
+    f.querySelector('input').style.display='none';
+    f.querySelector('button').style.display='none';
+    document.getElementById('ok-'+id).style.display='block';
+    return false;
+  }
+</script>
+</body>
+</html>
