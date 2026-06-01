@@ -10,6 +10,10 @@
   var ac, ring, ringLen, ringPos=0, srcNode, proc, zero;
   var caps=[];                        // captions: {who,text,born}
   var recording=false, recStart=0;
+  // playful-but-truthful caption voice (a mood gloss of the REAL detected class, not a fake quote)
+  var VIBE={Content:'totally chill 😌', Angry:'absolutely FURIOUS 😾', Defense:'on guard, backing off',
+    Fighting:'throwing paws 🥊', Warning:'final warning, human 😼', Mating:'yowling for a mate 🌙',
+    MotherCall:'calling the kittens 🐈', Hunting:'locked on prey 🪶'};
 
   function pickMime(){
     var c=['video/mp4;codecs=h264,aac','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
@@ -116,7 +120,7 @@
     return PawEngine.analyze(buf, ac.sampleRate).then(function(r){
       if(!r.isCat){ caption('cat','(no clear cat sound)'); return r; }
       var top=r.soundClasses[0];
-      caption('cat', top.label+' ('+(r.arousal==='high'?'agitated':'calm')+')');
+      caption('cat', VIBE[top.id] || top.label);
       return r;
     }).catch(function(){ caption('cat','(could not read)'); return null; });
   }

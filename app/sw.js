@@ -1,5 +1,5 @@
 /* Pawlogue service worker: offline app shell. Bump CACHE to invalidate. */
-var CACHE='pawlogue-v9';
+var CACHE='pawlogue-v10';
 var ASSETS=['./','index.html','model.html','app.js','audio.js','talk.js','video.js','manifest.json','icon-192.png','icon-512.png',
   'model_samples/Content.mp3','model_samples/Angry.mp3','model_samples/Defensive.mp3','model_samples/Fighting.mp3',
   'model_samples/Warning.mp3','model_samples/Mating.mp3','model_samples/MotherCall.mp3','model_samples/Hunting.mp3',

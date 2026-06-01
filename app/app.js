@@ -28,6 +28,31 @@ var App=(function(){
     }).then(function(eng){ $('hint').textContent='On-device and honest. We read mood, never fake words.'; showResultReal(eng,last); })
       .catch(function(){ $('hint').textContent='Demo unavailable. Use the Listen button.'; });
   }
+  // shareable photo card of the current result (DECISIONS: photo share = branded result card)
+  function _mark(x,bx,by,s){var hs=[8,20,13,17],cols=['#E8A657','#f0c389','#2D8B7A','#E8A657'];
+    for(var i=0;i<4;i++){x.fillStyle=cols[i];x.fillRect(bx+i*8*s,by-hs[i]*s,5*s,hs[i]*s);}
+    x.fillStyle='#F2E8D5';x.font='800 '+Math.round(34*s)+'px system-ui,sans-serif';x.fillText('Pawlogue',bx+40*s,by);}
+  function _wrap(x,t,bx,by,maxw,lh){var w=(t||'').split(' '),line='',yy=by;
+    for(var i=0;i<w.length;i++){var tt=line+w[i]+' ';if(x.measureText(tt).width>maxw&&line){x.fillText(line.trim(),bx,yy);line=w[i]+' ';yy+=lh;}else line=tt;}
+    x.fillText(line.trim(),bx,yy);return yy;}
+  function shareCard(){
+    var rmain=$('rmain').textContent.trim(), rsub=$('rsub').textContent.trim();
+    var c=document.createElement('canvas');c.width=1080;c.height=1080;var x=c.getContext('2d');
+    x.fillStyle='#12100E';x.fillRect(0,0,1080,1080);
+    var g=x.createRadialGradient(840,170,30,840,170,640);g.addColorStop(0,'rgba(232,166,87,.22)');g.addColorStop(1,'rgba(232,166,87,0)');x.fillStyle=g;x.fillRect(0,0,1080,1080);
+    var g2=x.createRadialGradient(180,960,30,180,960,600);g2.addColorStop(0,'rgba(45,139,122,.18)');g2.addColorStop(1,'rgba(45,139,122,0)');x.fillStyle=g2;x.fillRect(0,0,1080,1080);
+    _mark(x,90,150,2.2);
+    x.fillStyle='#5bb3a2';x.font='700 32px system-ui,sans-serif';x.fillText((pet||'Your cat').toUpperCase()+' SAYS',92,430);
+    x.fillStyle='#F2E8D5';x.font='800 92px Georgia,serif';var yy=_wrap(x,rmain,90,550,910,104);
+    x.fillStyle='#cdbfa8';x.font='400 36px system-ui,sans-serif';_wrap(x,rsub,90,yy+74,910,48);
+    _mark(x,90,1000,1.6);
+    x.fillStyle='#8a8070';x.font='600 27px system-ui,sans-serif';x.fillText('pawlogue.pet',330,1000);
+    c.toBlob(function(b){ if(!b){toast('Could not make card');return;}
+      var f=new File([b],'pawlogue-'+(pet||'cat')+'.png',{type:'image/png'});
+      if(navigator.canShare&&navigator.canShare({files:[f]})){ navigator.share({files:[f],title:'Pawlogue',text:(pet||'My cat')+' on Pawlogue, the honest cat translator'}).catch(function(){}); }
+      else { var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=f.name;a.click(); toast('Card saved'); }
+    },'image/png');
+  }
   var LABELS=['Hungry / food','Let me in / out','Wants attention','Greeting','Play','Distress','Other'];
   var BASE=[
     {snd:'Purr-like rumble',mean:'Content, calm, self-soothing'},
@@ -289,7 +314,7 @@ var App=(function(){
   function drawWave(data){var bars=$('wave').children;if(!bars.length)buildWave();bars=$('wave').children;var step=Math.floor(data.length/bars.length)||1;
     for(var i=0;i<bars.length;i++){var v=data[i*step]/255;bars[i].style.height=(6+v*40)+'px';}}
 
-  return {init:init,editPet:editPet,savePet:savePet,pickSpecies:pickSpecies,toggleConsent:toggleConsent,saveConsent:saveConsent,startTrial:startTrial,demoListen:demoListen,go:go,toggleRec:toggleRec,startTeach:startTeach,closeSheet:closeSheet,reacted:reacted,sayParse:sayParse,
+  return {init:init,editPet:editPet,savePet:savePet,pickSpecies:pickSpecies,toggleConsent:toggleConsent,saveConsent:saveConsent,startTrial:startTrial,demoListen:demoListen,shareCard:shareCard,go:go,toggleRec:toggleRec,startTeach:startTeach,closeSheet:closeSheet,reacted:reacted,sayParse:sayParse,
     vidStart:vidStart,vidToggleRec:vidToggleRec,vidReadCat:vidReadCat,vidShare:vidShare,vidSave:vidSave,vidRetake:vidRetake};
 })();
 document.addEventListener('DOMContentLoaded',App.init);

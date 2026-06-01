@@ -232,11 +232,10 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
     <div id="vidStart"><button class="btn" style="width:100%;border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:16px;padding:14px;border-radius:13px;background:var(--amber);color:#1a1206" onclick="App.vidStart()">Start camera</button>
       <p class="sub" style="margin-top:10px">Cats first. Your video never leaves your phone unless you share it.</p></div>
     <div id="vidLive" class="hidden">
+      <div class="vidrow"><button class="btn" id="vidRecBtn" onclick="App.vidToggleRec()">● Record</button></div>
+      <div class="sub" style="margin:16px 0 8px">While filming, tap to add to the clip:</div>
+      <div class="vidrow"><button class="btn ghost" onclick="App.vidReadCat()">🐱 Read my cat</button></div>
       <div class="vidcues" id="vidCues"></div>
-      <div class="vidrow">
-        <button class="btn ghost" onclick="App.vidReadCat()">🐱 Cat said?</button>
-        <button class="btn" id="vidRecBtn" onclick="App.vidToggleRec()">● Record</button>
-      </div>
     </div>
     <div id="vidResult" class="hidden">
       <video id="vidPlayback" controls playsinline style="width:100%;max-width:340px;display:block;margin:0 auto 12px;border-radius:14px"></video>
@@ -315,7 +314,8 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   </div>
   <div class="racts">
     <button onclick="App.closeSheet()">Done</button>
-    <button class="primary" id="teachBtn" onclick="App.startTeach()">Teach this</button>
+    <button onclick="App.shareCard()">Share</button>
+    <button class="primary" id="teachBtn" onclick="App.startTeach()">Teach</button>
   </div>
   <div class="note" id="rnote"></div>
 </div>
