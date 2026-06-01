@@ -40,7 +40,7 @@ Audio is processed on your device by default. Nothing leaves your phone unless y
 
 ## Pricing and platforms
 
-- Pricing: 7-day free trial, then $19 per year. One simple price, no ads.
+- Pricing: 7-day free trial, then $29 per year. One simple price, no ads.
 - Platforms: iOS and Android. Currently in build, with a waitlist open (cats first, dogs next).
 
 ## Is there an honest cat translator?

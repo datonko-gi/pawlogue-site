@@ -16,8 +16,8 @@ Companion files already created in this folder: `robots.txt`, `sitemap.xml`, `ll
 
 ## IMPORTANT data check before you ship
 
-The live FAQ in index.html (line ~348) currently says "A 30-day free trial, then $19 per year."
-The product brief and this plan use "7-day free trial, then $19/year." These contradict each other.
+The live FAQ in index.html (line ~348) currently says "A 30-day free trial, then $29 per year."
+The product brief and this plan use "7-day free trial, then $29/year." These contradict each other.
 Pick ONE and make it consistent across index.html FAQ, the JSON-LD below (`offers`), and llms.txt.
 The JSON-LD below is written for the 7-day trial. If you keep 30-day on the site, change the FAQ
 answer in the FAQPage schema AND fix the visible FAQ. Mismatched numbers hurt trust and can get
@@ -36,7 +36,7 @@ OG image exists (see section 4).
 ```html
 <!-- Primary -->
 <title>Pawlogue: Honest Two-Way Cat Translator. Talk With Your Cat</title>
-<meta name="description" content="Pawlogue is the first honest two-way cat translator. It reads your cat's mood and sounds, learns your cat's own meows, and helps you answer back with cues cats actually respond to. No fake sentences. 7-day free trial, then $19/year. iOS and Android." />
+<meta name="description" content="Pawlogue is the first honest two-way cat translator. It reads your cat's mood and sounds, learns your cat's own meows, and helps you answer back with cues cats actually respond to. No fake sentences. 7-day free trial, then $29/year. iOS and Android." />
 <link rel="canonical" href="https://pawlogue.pet/" />
 <meta name="theme-color" content="#12100E" />
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
@@ -57,7 +57,7 @@ OG image exists (see section 4).
 <!-- Twitter / X Card -->
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Pawlogue: honest two-way cat translator" />
-<meta name="twitter:description" content="Reads your cat, learns your cat's own meows, helps you answer back with cues cats actually respond to. No fake sentences. 7-day free trial, then $19/year." />
+<meta name="twitter:description" content="Reads your cat, learns your cat's own meows, helps you answer back with cues cats actually respond to. No fake sentences. 7-day free trial, then $29/year." />
 <meta name="twitter:image" content="https://pawlogue.pet/og-image.png" />
 <meta name="twitter:image:alt" content="Pawlogue app showing a cat's meow read honestly as a mood, with a reply cue." />
 
@@ -93,9 +93,9 @@ OG image exists (see section 4).
   "publisher": { "@id": "https://pawlogue.pet/#org" },
   "offers": {
     "@type": "Offer",
-    "price": "19.00",
+    "price": "29.00",
     "priceCurrency": "USD",
-    "description": "7-day free trial, then $19 per year. One simple price, no ads.",
+    "description": "7-day free trial, then $29 per year. One simple price, no ads.",
     "category": "Annual subscription"
   },
   "featureList": [
@@ -168,7 +168,7 @@ OG image exists (see section 4).
       "name": "What does Pawlogue cost?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "A 7-day free trial, then $19 per year. One simple price. No ads."
+        "text": "A 7-day free trial, then $29 per year. One simple price. No ads."
       }
     },
     {
@@ -229,7 +229,7 @@ self-contained answer paragraphs. These already live partly in llms.txt and the 
 
 AEO rule of thumb: each answer should be true standalone, name "Pawlogue" explicitly in the first
 sentence, and avoid hype words. LLMs prefer specific, falsifiable claims ("reads mood and cross-cat
-sounds; learns your cat's meows; 7-day trial then $19/year") over adjectives.
+sounds; learns your cat's meows; 7-day trial then $29/year") over adjectives.
 
 ---
 
