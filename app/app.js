@@ -84,7 +84,7 @@ var App=(function(){
   function toast(m){var t=$('toast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2200);}
 
   function init(){
-    openDB();
+    openDB().then(function(){ refreshVoiceBank().then(function(){ buildCues('talkCues'); buildCues('replyCues'); renderDict(); }); });
     if(!pet){ showWizard('species'); }
     else setPet(pet);
     buildChips(); renderDict(); renderLog(); renderBaseDict(); buildCues('talkCues'); buildCues('replyCues');
@@ -137,7 +137,7 @@ var App=(function(){
     if(v!=='video' && typeof PawVideo!=='undefined'){ try{PawVideo.stopCamera();}catch(_){} resetVideoPanels(); }
     ['listen','talk','video','dict','log'].forEach(function(x){$('view-'+x).classList.toggle('hidden',x!==v);$('nav-'+x).classList.toggle('active',x===v);});
     if(v==='dict'){renderDict();renderBaseDict();} if(v==='log')renderLog();
-    if(v==='talk'){buildCues('talkCues');renderOwnVoice();$('reactPrompt2').classList.add('hidden');renderTips(true);}
+    if(v==='talk'){refreshVoiceBank().then(function(){buildCues('talkCues');});$('reactPrompt2').classList.add('hidden');renderTips(true);}
     if(v==='video'){ resetVideoPanels(); renderClips(); }}
   function resetVideoPanels(){ vidCameraOn=false; var s=$('vidStart'),l=$('vidLive'),r=$('vidResult'); if(s)s.classList.remove('hidden'); if(l)l.classList.add('hidden'); if(r)r.classList.add('hidden'); var b=$('vidRecBtn'); if(b){b.textContent='● Record';b.classList.remove('rec');} }
   var vidCurrentBlob=null, vidCameraOn=false;
@@ -285,45 +285,35 @@ var App=(function(){
     if(!last||!last.vector){toast('No clip to save');return;}
     addProto({label:label,vector:last.vector,blob:last.blob,ts:Date.now(),src:'teach'}).then(function(){
       toast((pet||'Your pet')+"'s dictionary grew 🎉");
-      $('labelArea').classList.add('hidden'); closeSheet(); renderDict(); renderOwnVoice();
+      $('labelArea').classList.add('hidden'); closeSheet(); renderDict(); refreshVoiceBank().then(function(){buildCues('talkCues');buildCues('replyCues');});
     });
   }
   // one-tap: keep this real recording in the cat's own-voice bank (auto-named by the model)
   function saveVoice(){
     if(!last||!last.vector||!last.blob){toast('Listen to '+(pet||'your cat')+' first');return;}
     addProto({label:(last.detLabel||'Sound'),vector:last.vector,blob:last.blob,ts:Date.now(),src:'voice'}).then(function(){
-      toast('Saved to '+(pet||'your cat')+"'s own voice 🎙");
-      renderOwnVoice(); renderDict();
+      var c=cueForLabel(last.detLabel);
+      toast(c ? ('Saved. '+(pet||'your cat')+"'s own voice now mixes into "+c+' 🎙') : 'Saved to '+(pet||'your cat')+"'s sounds 🎙");
+      refreshVoiceBank().then(function(){buildCues('talkCues');buildCues('replyCues');}); renderDict();
     });
   }
-  // ---- talk back in the cat's OWN voice (real recordings, replayed honestly) ----
-  var ownIdx={};
-  function renderOwnVoice(){
-    var box=$('ownVoiceCues'); if(!box)return;
-    allProto().then(function(ps){
-      var lab=$('ownVoiceLabel'), sub=$('ownVoiceSub'); box.innerHTML='';
-      var withAudio=ps.filter(function(p){return p&&p.blob;});
-      if(!withAudio.length){ if(lab)lab.style.display='none'; if(sub)sub.style.display='none'; return; }
-      if(lab)lab.style.display=''; if(sub)sub.style.display='';
-      [].forEach.call(document.querySelectorAll('.ownNm'),function(e){e.textContent=pet||'your cat';});
-      var byL={}; withAudio.forEach(function(p){(byL[p.label]=byL[p.label]||[]).push(p);});
-      Object.keys(byL).forEach(function(k){var items=byL[k];
-        var el=document.createElement('button'); el.className='cue';
-        el.innerHTML='<div class="cl">🐱 '+k+' <span style="font-weight:600;color:var(--amber)">· their voice</span></div>'+
-          '<div class="cb">'+items.length+' real recording'+(items.length>1?'s':'')+' of '+(pet||'your cat')+', replayed as-is.</div>'+
-          '<div class="hit none">tap to play '+(items.length>1?'(cycles through them)':'')+'</div>';
-        el.onclick=function(){playOwn(k,items,el);};
-        box.appendChild(el);});
-    });
+  // ---- the cat's OWN voice, blended into the cat-sound cues (real recordings, replayed honestly) ----
+  // Only friendly cat sounds get replayed back to the cat. Distress (angry/defensive/fighting/warning/mating) never does.
+  function cueForLabel(label){var l=(label||'').toLowerCase();
+    if(/angry|defens|fight|warn|mating|caterwaul|hiss|pain/.test(l)) return null;
+    if(/content|relax|purr|happy|rest|calm/.test(l)) return 'purr';
+    if(/mother|trill|chirp|hunt|chatter|prey/.test(l)) return 'trill';
+    return 'meow';
   }
-  function playOwn(label,items,el){
-    var i=(ownIdx[label]||0); ownIdx[label]=i+1; var it=items[i%items.length];
-    playBlob(it.blob);
-    if(el){el.classList.add('lit');setTimeout(function(){el.classList.remove('lit');},700);}
-    toast('Played '+(pet||'your cat')+"'s own voice (clip "+((i%items.length)+1)+' of '+items.length+')');
-    lastCue='own:'+label;
-    var rp=$('reactPrompt2'); if(rp){rp.classList.remove('hidden'); var rq=rp.querySelector('.rq'); if(rq)rq.textContent='Did '+(pet||'your cat')+' react to their own voice?';}
-  }
+  var voiceBank={purr:[],trill:[],meow:[]}, vbIdx={};
+  function refreshVoiceBank(){return allProto().then(function(ps){
+    voiceBank={purr:[],trill:[],meow:[]};
+    ps.forEach(function(p){ if(!p||!p.blob)return; var c=cueForLabel(p.label); if(c&&voiceBank[c])voiceBank[c].push(p); });
+    var tot=voiceBank.purr.length+voiceBank.trill.length+voiceBank.meow.length;
+    var pp=$('voiceProgress');
+    if(pp){ if(tot){ pp.style.display=''; pp.textContent='🎙 '+(pet||'your cat')+"'s own voice is mixing into purr / trill / meow ("+tot+' real clip'+(tot>1?'s':'')+' so far, more arrives the more you save).'; } else pp.style.display='none'; }
+    return voiceBank;
+  });}
   function countLabel(ps,l){var n=0;ps.forEach(function(p){if(p.label===l)n++;});return n;}
   function renderDict(){
     allProto().then(function(ps){
@@ -356,16 +346,23 @@ var App=(function(){
     list.forEach(function(it){var q=it.q,s=it.s;
       var hit=s.t?('worked '+s.r+' of '+s.t):'not tried yet';
       var star=(q.id===best&&s.r>0)?' ⭐':'';
+      var own=(voiceBank[q.id]||[]).length;
+      var basis=q.basis+(own?(' <span style="color:var(--amber);font-weight:600">Now mixing in '+own+' of '+(pet||'your cat')+"'s own.</span>"):'');
       var el=document.createElement('button');el.className='cue';
-      el.innerHTML='<div class="cl">'+q.icon+' '+q.label+star+'</div><div class="cb">'+q.basis+'</div><div class="hit'+(s.t?'':' none')+'">'+hit+'</div>';
+      el.innerHTML='<div class="cl">'+q.icon+' '+q.label+star+'</div><div class="cb">'+basis+'</div><div class="hit'+(s.t?'':' none')+'">'+hit+'</div>';
       el.onclick=function(){playCue(q.id,el);};
       c.appendChild(el);});}
   function playCue(id,el){var q=PawTalk.cue(id);if(!q)return;
     var now=Date.now(); cuePlays.push(now); cuePlays=cuePlays.filter(function(t){return now-t<60000;});
     if(cuePlays.length>8){ toast('Give '+(pet||'your cat')+' a break. Too many sounds in a row can stress a cat.'); }
-    var info=PawTalk.play(id,pet); lastCue=id;
+    // blend the cat's own real recordings into the cat-sound cues; chance grows as more are saved
+    var bank=voiceBank[id]||[], n=bank.length, info=null, usedOwn=false;
+    if(n && Math.random() < n/(n+4)){
+      var i=(vbIdx[id]||0); vbIdx[id]=i+1; playBlob(bank[i%n].blob); usedOwn=true; info={variant:(i%n)+1,total:n};
+    } else { info=PawTalk.play(id,pet); }
+    lastCue=id;
     if(el){el.classList.add('lit');setTimeout(function(){el.classList.remove('lit');},700);}
-    toast('Played: '+q.label+(info?(' (variant '+info.variant+' of '+info.total+')'):''));
+    toast('Played: '+q.label+(usedOwn?(' — '+(pet||'your cat')+"'s own voice"):'')+(info?(' (variant '+info.variant+' of '+info.total+')'):''));
     var sheetUp=$('sheet').classList.contains('up');
     var rp=$(sheetUp?'reactPrompt':'reactPrompt2');
     if(rp){ rp.classList.remove('hidden'); var rq=rp.querySelector('.rq'); if(rq)rq.textContent='Did '+(pet||'your cat')+' react to '+q.label+'?'; }}
