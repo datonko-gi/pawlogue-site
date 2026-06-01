@@ -81,14 +81,16 @@ var App=(function(){
     openDB();
     if(!pet){ showWizard('species'); }
     else setPet(pet);
-    buildChips(); renderDict(); renderLog(); renderBaseDict(); renderTips(); buildCues('talkCues'); buildCues('replyCues');
+    buildChips(); renderDict(); renderLog(); renderBaseDict(); buildCues('talkCues'); buildCues('replyCues');
     var si=$('sayInput'); if(si) si.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); sayParse(); } });
     initEngine();
   }
-  function renderTips(){var el=$('tipsList');if(!el)return;el.innerHTML='';
-    PawTalk.TIPS.forEach(function(t){var d=document.createElement('div');d.className='tip';
-      d.innerHTML='<div class="ti">'+t.icon+'</div><div><div class="tt">'+t.title+'</div><div class="tb">'+t.body+'</div></div>';
-      el.appendChild(d);});}
+  function renderTips(advance){var el=$('tipsList');if(!el||typeof PawTalk==='undefined')return;
+    var tips=PawTalk.TIPS, n=tips.length; if(!n)return;
+    var idx=parseInt(localStorage.getItem('paw_tip_idx')||'0',10); if(isNaN(idx))idx=0; idx=((idx%n)+n)%n;
+    var t=tips[idx];
+    el.innerHTML='<div class="tip"><div class="ti">'+t.icon+'</div><div><div class="tt">'+t.title+'</div><div class="tb">'+t.body+'</div></div></div>';
+    if(advance){ localStorage.setItem('paw_tip_idx', String((idx+1)%n)); }}
   function setText(id,t){var e=$(id);if(e)e.textContent=t;}
   function showWizard(step){$('petModal').classList.remove('hidden');
     ['species','name','consent','trial'].forEach(function(s){$('step-'+s).classList.toggle('hidden',s!==step);});
@@ -122,7 +124,7 @@ var App=(function(){
     if(v!=='video' && typeof PawVideo!=='undefined'){ try{PawVideo.stopCamera();}catch(_){} resetVideoPanels(); }
     ['listen','talk','video','dict','log'].forEach(function(x){$('view-'+x).classList.toggle('hidden',x!==v);$('nav-'+x).classList.toggle('active',x===v);});
     if(v==='dict'){renderDict();renderBaseDict();} if(v==='log')renderLog();
-    if(v==='talk'){buildCues('talkCues');$('reactPrompt2').classList.add('hidden');}
+    if(v==='talk'){buildCues('talkCues');$('reactPrompt2').classList.add('hidden');renderTips(true);}
     if(v==='video'){ resetVideoPanels(); }}
   function resetVideoPanels(){ var s=$('vidStart'),l=$('vidLive'),r=$('vidResult'); if(s)s.classList.remove('hidden'); if(l)l.classList.add('hidden'); if(r)r.classList.add('hidden'); var b=$('vidRecBtn'); if(b){b.textContent='● Record';b.classList.remove('rec');} }
   function buildVidCues(){var c=$('vidCues');if(!c||typeof PawTalk==='undefined')return;c.innerHTML='';

@@ -38,7 +38,24 @@
     {icon:'💬', title:'Use a warm, high voice', body:'Cats respond more to a soft, high, sing-song tone (the way we talk to babies) than to flat speech. Your real voice beats any synthetic one.'},
     {icon:'🪶', title:'Play like prey', body:'Drag a toy in quick, darting moves with pauses, the way real prey moves. Short bursts then a freeze. It speaks to your cat’s hunting instinct.'},
     {icon:'👃', title:'Offer a slow finger', body:'Hold out a relaxed finger at nose height and let your cat come to it. It mimics the polite nose-touch greeting cats do with each other.'},
-    {icon:'🧘', title:'Let the cat choose', body:'The strongest bond signal is patience. Sit near, stay calm, and let your cat approach on its own terms. Forcing contact breaks trust.'}
+    {icon:'🧘', title:'Let the cat choose', body:'The strongest bond signal is patience. Sit near, stay calm, and let your cat approach on its own terms. Forcing contact breaks trust.'},
+    {icon:'👀', title:'Never hard-stare', body:'A long, unblinking stare reads as a threat to a cat. Soften your gaze and look away now and then. It tells them you are safe.'},
+    {icon:'🐈', title:'Read the tail', body:'Tail straight up is a happy hello. A little quiver at the tip is pure excitement to see you. Puffed up or thrashing means give them space.'},
+    {icon:'👂', title:'Watch the ears', body:'Ears forward means curious and engaged. Ears flat or turned back means stop, they are scared or annoyed. Let the ears guide you.'},
+    {icon:'🍽', title:'Name before good things', body:'Say your cat’s name right before food, treats, or play, every time. They learn their name means something good is coming and start responding to it.'},
+    {icon:'🙇', title:'Get down to their level', body:'Crouch or sit on the floor instead of looming over them. Being at their height is far less intimidating and invites them in.'},
+    {icon:'🛐', title:'Let them sniff first', body:'Before petting, offer your hand and let your cat sniff it. Scent is their handshake. Skipping it feels rude and rushed to a cat.'},
+    {icon:'🫳', title:'Pet where they like it', body:'Cheeks, chin, and the base of the ears are almost always welcome. Bellies and the tail base often are not. Watch for the lean-in versus the flinch.'},
+    {icon:'🏔', title:'Give them a high perch', body:'Cats feel safest when they can survey the room from up high. A shelf, a cat tree, or a windowsill lowers their stress and builds confidence.'},
+    {icon:'🕰', title:'Keep a routine', body:'Feed, play, and greet at roughly the same times each day. Predictability is comfort for a cat and quietly deepens trust over weeks.'},
+    {icon:'🎯', title:'End play with a catch', body:'Let your cat actually "catch" the toy at the end of a play session, then feed a little. A successful hunt leaves them satisfied, not wound up.'},
+    {icon:'🚫', title:'Redirect, never punish', body:'Cats do not learn from being scolded, they just learn to fear you. Redirect to a scratching post or toy and reward the behavior you want.'},
+    {icon:'🐾', title:'The elevator butt', body:'If your cat raises its hips when you scratch near the tail base, that is "yes, right there". It is a clear request for more.'},
+    {icon:'😺', title:'Blink back', body:'When your cat slow-blinks at you, slow-blink back. You are literally returning an "I love you". It is the simplest two-way moment you can have.'},
+    {icon:'🧶', title:'Rotate the toys', body:'Put some toys away and swap them weekly. A "new" old toy reawakens curiosity and gives you fresh ways to engage them.'},
+    {icon:'🌙', title:'Respect the loaf and the nap', body:'A cat tucked into a loaf or deep asleep is telling you it feels secure. Let them be. Honoring their rest is its own kind of trust.'},
+    {icon:'🍗', title:'Hand-feed a treat', body:'Offer a favorite treat from your open palm. Taking food from your hand is a real trust step, especially for a shy or new cat.'},
+    {icon:'🗣', title:'Answer their meow', body:'When your cat meows at you, reply out loud, then pause. Cats meow mostly to talk TO people. Answering turns it into a real back-and-forth.'}
   ];
 
   // ---- synthesis (pspsps), varied every press ----
