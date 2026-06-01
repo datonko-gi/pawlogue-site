@@ -17,7 +17,11 @@
     -webkit-font-smoothing:antialiased;padding:0 18px calc(60px + env(safe-area-inset-bottom))}
   .wrap{max-width:680px;margin:0 auto}
   a{color:var(--amber)}
-  .top{display:flex;align-items:center;gap:9px;padding:18px 0 6px;font-weight:800;font-size:18px}
+  .top{display:flex;align-items:center;gap:9px;padding:18px 0 6px;font-weight:800;font-size:18px;color:var(--cream);text-decoration:none}
+  .scale{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 6px}
+  .scale div{flex:1;min-width:120px;background:var(--ink2);border:1px solid var(--line);border-radius:14px;padding:13px 15px}
+  .scale .big{font-family:var(--serif);font-size:24px;color:var(--amber)}
+  .scale .lbl{font-size:12px;color:var(--mut);margin-top:2px}
   .top .mk{display:flex;align-items:flex-end;gap:2.5px;height:18px}
   .top .mk i{width:3px;border-radius:3px;background:var(--amber);display:block}
   .top .mk i:nth-child(1){height:7px}.top .mk i:nth-child(2){height:16px;background:var(--amber2)}
@@ -60,10 +64,22 @@
 </style>
 </head>
 <body><div class="wrap">
-  <div class="top"><span class="mk"><i></i><i></i><i></i><i></i></span>Pawlogue</div>
+  <a class="top" href="/"><span class="mk"><i></i><i></i><i></i><i></i></span>Pawlogue</a>
   <h1>The on-device model</h1>
   <div class="lede">This is the real model that runs inside the app, on your phone, with no server. Everything below is honest: real holdout numbers, the real classes, and the model running live on real clips right here in your browser.</div>
   <a class="back" href="./">&larr; Back to the app</a>
+
+  <h2>Data at a glance</h2>
+  <div class="sub">We did not train on 124 clips total. That number is only the fine 8-class emotion dictionary, which is data-limited because the full labeled emotion database is gated by its authors. The detector, the affect head, and the whole dog side draw on far more.</div>
+  <div class="scale">
+    <div><div class="big">94</div><div class="lbl">datasets cataloged</div></div>
+    <div><div class="big">~90 GB</div><div class="lbl">audio pulled to disk</div></div>
+    <div><div class="big">300k+</div><div class="lbl">clips on disk (mostly dog)</div></div>
+    <div><div class="big">5,728</div><div class="lbl">clips: cat detector training</div></div>
+    <div><div class="big">3,015</div><div class="lbl">clips: dog detector training</div></div>
+    <div><div class="big">124</div><div class="lbl">open clips: fine emotion dictionary (the gated piece)</div></div>
+  </div>
+  <p class="muted">So the scale is real. The honest bottleneck is specifically labeled fine-emotion CAT audio, which barely exists in the open (the full Cat Sound V2 set, about 3,000 clips, is author-gated). Detector and dog data are plentiful. The full source list with licenses is on the <a href="/science.html">science page</a>.</p>
 
   <h2>Hear it on all 8 sounds</h2>
   <div class="sub">One real clip per class, run live through the exact on-device model as the page loads. Tap play to listen. The bars are the 8-class dictionary read. The "detector" line is a separate gate: it is meow-trained, so some loud non-meow clips (a defensive yowl, a fight) score low and would be held back as "not sure" in the app. The honest held-out accuracy per class is in the table below, these clips just let you hear the model run.</div>

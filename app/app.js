@@ -17,6 +17,17 @@ var App=(function(){
       var h=$('hint'); if(h)h.textContent='Real on-device model loaded. Tap to listen.';
     }).catch(function(){engineReady=false;});
   }
+  function demoListen(){
+    if(!engineReady){ toast('Model still loading, one sec'); return; }
+    $('hint').textContent='Demo: reading a real sample meow...';
+    fetch('sounds/meow2.mp3').then(function(r){return r.arrayBuffer();}).then(function(ab){
+      var AC=window.AudioContext||window.webkitAudioContext, ac=new AC(); return ac.decodeAudioData(ab.slice(0));
+    }).then(function(buf){
+      last={pcm:buf.getChannelData(0).slice(),sampleRate:buf.sampleRate,vector:null};
+      return PawEngine.analyze(last.pcm,last.sampleRate);
+    }).then(function(eng){ $('hint').textContent='On-device and honest. We read mood, never fake words.'; showResultReal(eng,last); })
+      .catch(function(){ $('hint').textContent='Demo unavailable. Use the Listen button.'; });
+  }
   var LABELS=['Hungry / food','Let me in / out','Wants attention','Greeting','Play','Distress','Other'];
   var BASE=[
     {snd:'Purr-like rumble',mean:'Content, calm, self-soothing'},
@@ -63,7 +74,8 @@ var App=(function(){
     if(k==='learn'){consent.learn=!consent.learn; if(!consent.learn)consent.clips=false;}
     else {consent.clips=!consent.clips; if(consent.clips)consent.learn=true;}
     renderConsentUI();}
-  function saveConsent(){consent.ts=Date.now(); localStorage.setItem('paw_consent',JSON.stringify(consent)); showWizard('trial');}
+  function saveConsent(){consent.ts=Date.now(); localStorage.setItem('paw_consent',JSON.stringify(consent));
+    var n=pendingName||pet||'Milo'; setPet(n); localStorage.setItem('paw_onboarded','1'); $('petModal').classList.add('hidden'); toast('Welcome, '+n+' 🐾'); go('listen');}
   function pickSpecies(s){species=s;localStorage.setItem('paw_species',s);
     var w=s==='dog'?'dog':'cat';
     setText('nameTitle','What is your '+w+"'s name?");
@@ -277,7 +289,7 @@ var App=(function(){
   function drawWave(data){var bars=$('wave').children;if(!bars.length)buildWave();bars=$('wave').children;var step=Math.floor(data.length/bars.length)||1;
     for(var i=0;i<bars.length;i++){var v=data[i*step]/255;bars[i].style.height=(6+v*40)+'px';}}
 
-  return {init:init,editPet:editPet,savePet:savePet,pickSpecies:pickSpecies,toggleConsent:toggleConsent,saveConsent:saveConsent,startTrial:startTrial,go:go,toggleRec:toggleRec,startTeach:startTeach,closeSheet:closeSheet,reacted:reacted,sayParse:sayParse,
+  return {init:init,editPet:editPet,savePet:savePet,pickSpecies:pickSpecies,toggleConsent:toggleConsent,saveConsent:saveConsent,startTrial:startTrial,demoListen:demoListen,go:go,toggleRec:toggleRec,startTeach:startTeach,closeSheet:closeSheet,reacted:reacted,sayParse:sayParse,
     vidStart:vidStart,vidToggleRec:vidToggleRec,vidReadCat:vidReadCat,vidShare:vidShare,vidSave:vidSave,vidRetake:vidRetake};
 })();
 document.addEventListener('DOMContentLoaded',App.init);

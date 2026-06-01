@@ -55,6 +55,8 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 .recbtn:active{transform:scale(.96)}
 .recbtn.live{background:radial-gradient(circle at 38% 32%,#e98b6e,var(--alert));box-shadow:0 14px 44px rgba(212,114,42,.4)}
 .hint{margin-top:26px;color:var(--mut);font-size:14px;max-width:30ch}
+.demobtn{margin-top:16px;background:none;border:1px solid var(--line);color:var(--amber);font-family:inherit;font-weight:600;font-size:13.5px;padding:9px 16px;border-radius:999px;cursor:pointer}
+.demobtn:active{border-color:var(--amber)}
 .wave{display:flex;align-items:center;gap:3px;height:46px;margin-top:8px}
 .wave i{width:3px;border-radius:3px;background:var(--amber);height:6px;transition:height .08s linear}
 
@@ -204,7 +206,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 <body>
 <div id="app">
   <div class="topbar">
-    <div class="logo"><span class="mk"><i></i><i></i><i></i><i></i></span>Pawlogue</div>
+    <div class="logo" style="cursor:pointer" onclick="App.go('listen')"><span class="mk"><i></i><i></i><i></i><i></i></span>Pawlogue</div>
     <div class="petchip" id="petchip" onclick="App.editPet()"><span id="petEmoji"></span><span id="petName">My pet</span> <span style="color:var(--mut)">▾</span></div>
   </div>
 
@@ -218,6 +220,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
       </div>
       <div class="wave" id="wave" aria-hidden="true"></div>
       <div class="hint" id="hint">On-device and honest. We read mood, never fake words.</div>
+      <button class="demobtn" id="demoBtn" onclick="App.demoListen()">▶ Hear a demo read</button>
     </div>
   </div>
 

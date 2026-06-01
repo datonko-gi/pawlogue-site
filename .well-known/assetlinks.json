@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "pet.pawlogue.twa",
+      "sha256_cert_fingerprints": [
+        "92:46:02:A4:05:1D:69:C7:62:FC:26:81:3D:B2:C7:5A:D1:9E:7D:1D:6E:15:E1:D3:7B:03:0A:71:98:70:74:A6"
+      ]
+    }
+  }
+]
