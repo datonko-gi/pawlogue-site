@@ -4,6 +4,7 @@ var App=(function(){
   var pet=localStorage.getItem('paw_pet')||'';
   var species=localStorage.getItem('paw_species')||'cat';
   var pendingName='';
+  var consent=(function(){try{return JSON.parse(localStorage.getItem('paw_consent')||'{}');}catch(_){return {};}})();
   var recording=false, last=null, db=null;
   var engineReady=false, DICT_CLASSES=[];
   var DICT_EMOJI={Content:'😌',Angry:'😾',Defense:'🙀',Fighting:'😼',Warning:'😼',Mating:'🌙',MotherCall:'🐈',Hunting:'🪶'};
@@ -55,13 +56,20 @@ var App=(function(){
       el.appendChild(d);});}
   function setText(id,t){var e=$(id);if(e)e.textContent=t;}
   function showWizard(step){$('petModal').classList.remove('hidden');
-    ['species','name','trial'].forEach(function(s){$('step-'+s).classList.toggle('hidden',s!==step);});}
+    ['species','name','consent','trial'].forEach(function(s){$('step-'+s).classList.toggle('hidden',s!==step);});
+    if(step==='consent')renderConsentUI();}
+  function renderConsentUI(){var l=$('ctog-learn'),c=$('ctog-clips');if(l)l.classList.toggle('on',!!consent.learn);if(c)c.classList.toggle('on',!!consent.clips);}
+  function toggleConsent(k){
+    if(k==='learn'){consent.learn=!consent.learn; if(!consent.learn)consent.clips=false;}
+    else {consent.clips=!consent.clips; if(consent.clips)consent.learn=true;}
+    renderConsentUI();}
+  function saveConsent(){consent.ts=Date.now(); localStorage.setItem('paw_consent',JSON.stringify(consent)); showWizard('trial');}
   function pickSpecies(s){species=s;localStorage.setItem('paw_species',s);
     var w=s==='dog'?'dog':'cat';
     setText('nameTitle','What is your '+w+"'s name?");
     $('namePara').textContent='No two '+w+'s sound alike. Pawlogue builds a personal dictionary just for them.';
     showWizard('name'); setTimeout(function(){var i=$('petInput');if(i)i.focus();},60);}
-  function savePet(){var v=$('petInput').value.trim();if(!v)return; pendingName=v; showWizard('trial');}
+  function savePet(){var v=$('petInput').value.trim();if(!v)return; pendingName=v; showWizard('consent');}
   function startTrial(){ var n=pendingName||pet||'Milo'; setPet(n);
     localStorage.setItem('paw_onboarded','1'); $('petModal').classList.add('hidden'); toast('Welcome, '+n+' 🐾'); }
   function setPet(n){pet=n;localStorage.setItem('paw_pet',n);localStorage.setItem('paw_species',species);
@@ -253,6 +261,6 @@ var App=(function(){
   function drawWave(data){var bars=$('wave').children;if(!bars.length)buildWave();bars=$('wave').children;var step=Math.floor(data.length/bars.length)||1;
     for(var i=0;i<bars.length;i++){var v=data[i*step]/255;bars[i].style.height=(6+v*40)+'px';}}
 
-  return {init:init,editPet:editPet,savePet:savePet,pickSpecies:pickSpecies,startTrial:startTrial,go:go,toggleRec:toggleRec,startTeach:startTeach,closeSheet:closeSheet,reacted:reacted,sayParse:sayParse};
+  return {init:init,editPet:editPet,savePet:savePet,pickSpecies:pickSpecies,toggleConsent:toggleConsent,saveConsent:saveConsent,startTrial:startTrial,go:go,toggleRec:toggleRec,startTeach:startTeach,closeSheet:closeSheet,reacted:reacted,sayParse:sayParse};
 })();
 document.addEventListener('DOMContentLoaded',App.init);

@@ -137,6 +137,15 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 .tline b{color:var(--dim);font-weight:600;font-size:13px;letter-spacing:.04em;text-transform:uppercase}
 .trialnote{font-size:12.5px;color:var(--mut);line-height:1.5;margin-bottom:16px}
 #petEmoji{margin-right:2px}
+.consent{display:flex;flex-direction:column;gap:10px;margin:6px 0 14px}
+.ctog{display:flex;gap:12px;align-items:flex-start;text-align:left;background:var(--ink3);border:1px solid var(--line);border-radius:14px;padding:13px 14px;cursor:pointer;font-family:inherit;color:var(--cream);transition:border-color .15s}
+.ctog .cbox{width:22px;height:22px;border-radius:7px;border:2px solid var(--mut);flex-shrink:0;margin-top:1px;position:relative;transition:all .15s}
+.ctog.on{border-color:var(--teal2)}
+.ctog.on .cbox{background:var(--teal2);border-color:var(--teal2)}
+.ctog.on .cbox::after{content:"✓";position:absolute;inset:0;color:#12100E;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.ctog .ctxt{display:flex;flex-direction:column;gap:3px}
+.ctog .ctxt b{font-size:14.5px;font-weight:700}
+.ctog .ctxt small{font-size:12.5px;color:var(--mut);line-height:1.45}
 
 /* reply palette (in result sheet) + Talk view */
 .replyhead{font-size:12.5px;color:var(--mut);margin:18px 0 10px;line-height:1.5}
@@ -301,7 +310,25 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
       <input id="petInput" placeholder="Name (e.g. Milo)" maxlength="24" />
       <button class="btn" onclick="App.savePet()">Continue</button>
     </div>
-    <!-- step 3: trial -->
+    <!-- step 3: consent -->
+    <div id="step-consent" class="hidden">
+      <h3>Help improve Pawlogue?</h3>
+      <p>Pawlogue learns your pet privately on your device. You can also help make it better for all pets. Your choice, and you can change it anytime in Settings.</p>
+      <div class="consent">
+        <button class="ctog" id="ctog-learn" onclick="App.toggleConsent('learn')">
+          <span class="cbox"></span>
+          <span class="ctxt"><b>Share anonymized learning data</b><small>Sound fingerprints plus the labels you confirm. Cannot be turned back into audio. Never sold.</small></span>
+        </button>
+        <button class="ctog" id="ctog-clips" onclick="App.toggleConsent('clips')">
+          <span class="cbox"></span>
+          <span class="ctxt"><b>Also share short clips</b><small>A few short recordings, tied to those labels. Helps the most. Fully optional, delete anytime.</small></span>
+        </button>
+      </div>
+      <button class="btn" onclick="App.saveConsent()">Continue</button>
+      <p class="trialnote">Both off by default. Either way the app works fully on your device. This only powers improvements to the shared model.</p>
+    </div>
+
+    <!-- step 4: trial -->
     <div id="step-trial" class="hidden">
       <h3>Start your free trial</h3>
       <div class="trial">
