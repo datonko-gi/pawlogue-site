@@ -312,22 +312,25 @@ var App=(function(){
 
   // ---- talk back (human -> cat, honest cues) ----
   function buildCues(cid){var c=$(cid);if(!c)return;c.innerHTML='';var st=statsPet();
-    PawTalk.CUES.forEach(function(q){var s=st[q.id];
-      var hit=s&&s.t?('worked '+s.r+' of '+s.t):'not tried yet';
+    var list=PawTalk.CUES.map(function(q){var s=st[q.id]||{t:0,r:0}; return {q:q,s:s,score:s.t?(s.r/s.t):-1};});
+    list.sort(function(a,b){return b.score-a.score;});
+    var best=(list[0]&&list[0].score>0)?list[0].q.id:null;
+    list.forEach(function(it){var q=it.q,s=it.s;
+      var hit=s.t?('worked '+s.r+' of '+s.t):'not tried yet';
+      var star=(q.id===best&&s.r>0)?' ⭐':'';
       var el=document.createElement('button');el.className='cue';
-      el.innerHTML='<div class="cl">'+q.icon+' '+q.label+'</div><div class="cb">'+q.basis+'</div><div class="hit'+(s&&s.t?'':' none')+'">'+hit+'</div>';
+      el.innerHTML='<div class="cl">'+q.icon+' '+q.label+star+'</div><div class="cb">'+q.basis+'</div><div class="hit'+(s.t?'':' none')+'">'+hit+'</div>';
       el.onclick=function(){playCue(q.id,el);};
       c.appendChild(el);});}
   function playCue(id,el){var q=PawTalk.cue(id);if(!q)return;
     var now=Date.now(); cuePlays.push(now); cuePlays=cuePlays.filter(function(t){return now-t<60000;});
     if(cuePlays.length>8){ toast('Give '+(pet||'your cat')+' a break. Too many sounds in a row can stress a cat.'); }
-    PawTalk.play(id,pet); lastCue=id;
+    var info=PawTalk.play(id,pet); lastCue=id;
     if(el){el.classList.add('lit');setTimeout(function(){el.classList.remove('lit');},700);}
-    if(id==='blink')toast('Look at '+(pet||'your cat')+', slowly close your eyes ~1s, then open');
-    else if(id==='voice')toast('Talk to '+(pet||'your cat')+' now, warm and high');
-    else toast('Played: '+q.label);
+    toast('Played: '+q.label+(info?(' (variant '+info.variant+' of '+info.total+')'):''));
     var sheetUp=$('sheet').classList.contains('up');
-    var rp=$(sheetUp?'reactPrompt':'reactPrompt2'); if(rp)rp.classList.remove('hidden');}
+    var rp=$(sheetUp?'reactPrompt':'reactPrompt2');
+    if(rp){ rp.classList.remove('hidden'); var rq=rp.querySelector('.rq'); if(rq)rq.textContent='Did '+(pet||'your cat')+' react to '+q.label+'?'; }}
   function reacted(yes){ if(!lastCue){return;} statsBump(lastCue,yes); lastCue=null;
     $('reactPrompt').classList.add('hidden'); $('reactPrompt2').classList.add('hidden');
     buildCues('talkCues'); buildCues('replyCues');
@@ -344,10 +347,19 @@ var App=(function(){
         s.className='tok '+cls; s.textContent=tk.word; box.appendChild(s);
         if(tk.known)known++;else unknown++;});
       var n=pet||'your cat';
-      $('sayNote').textContent = unknown
-        ? (known? n+' works with the teal words. The orange ones '+n+' has not learned yet.' : n+' has not learned any of these yet. Try a cue above, or teach a meow first.')
-        : 'All of these map to cues '+n+' can respond to. Play them from the cues above.';
+      var seq=toks.filter(function(tk){return tk.cueId;}).map(function(tk){return tk.cueId;});
+      if(seq.length){
+        playSequence(seq);
+        $('sayNote').textContent = unknown
+          ? 'Playing the teal words to '+n+' as a little phrase. The orange ones '+n+' has not learned yet.'
+          : 'Playing it to '+n+' as a phrase: '+seq.length+' sound'+(seq.length>1?'s':'')+' in a row. Watch for a reaction.';
+      } else {
+        $('sayNote').textContent = n+' has not learned any of these yet. Try a cue above, or teach a meow first.';
+      }
     });}
+  var _seqT=[];
+  function playSequence(ids){ _seqT.forEach(clearTimeout); _seqT=[];
+    ids.forEach(function(id,i){ _seqT.push(setTimeout(function(){ PawTalk.play(id, pet); },i*1150)); }); }
 
   // ---- recent log (localStorage) ----
   function logResult(c){var l=JSON.parse(localStorage.getItem('paw_log')||'[]');l.unshift({t:Date.now(),s:c.soundType,a:affectShort(c.affect),e:c.emoji,c:c.confidence});l=l.slice(0,30);localStorage.setItem('paw_log',JSON.stringify(l));}
