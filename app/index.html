@@ -123,6 +123,21 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   opacity:0;transition:opacity .3s;pointer-events:none;max-width:90%}
 .toast.show{opacity:1}
 
+/* onboarding wizard */
+.species{display:flex;gap:12px;margin-top:6px}
+.spbtn{flex:1;background:var(--ink3);border:1px solid var(--line);color:var(--cream);font-family:inherit;
+  font-weight:700;font-size:16px;padding:22px 10px;border-radius:16px;cursor:pointer;display:flex;
+  flex-direction:column;align-items:center;gap:10px;transition:border-color .15s,transform .1s}
+.spbtn:active{transform:scale(.97)}
+.spbtn:hover{border-color:var(--amber)}
+.spbtn .spi{font-size:40px;line-height:1}
+.trial{margin:4px 0 14px;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.tline{display:flex;justify-content:space-between;align-items:center;padding:13px 16px;border-bottom:1px solid var(--line);font-size:15px}
+.tline:last-child{border-bottom:none}
+.tline b{color:var(--dim);font-weight:600;font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+.trialnote{font-size:12.5px;color:var(--mut);line-height:1.5;margin-bottom:16px}
+#petEmoji{margin-right:2px}
+
 /* reply palette (in result sheet) + Talk view */
 .replyhead{font-size:12.5px;color:var(--mut);margin:18px 0 10px;line-height:1.5}
 .cues{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
@@ -167,7 +182,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 <div id="app">
   <div class="topbar">
     <div class="logo"><span class="mk"><i></i><i></i><i></i><i></i></span>Pawlogue</div>
-    <div class="petchip" id="petchip" onclick="App.editPet()"><span id="petName">My pet</span> <span style="color:var(--mut)">▾</span></div>
+    <div class="petchip" id="petchip" onclick="App.editPet()"><span id="petEmoji"></span><span id="petName">My pet</span> <span style="color:var(--mut)">▾</span></div>
   </div>
 
   <!-- LISTEN -->
@@ -262,10 +277,33 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 <div class="toast" id="toast"></div>
 <div class="modal hidden" id="petModal">
   <div class="box">
-    <h3>Who's your pet?</h3>
-    <p>Pawlogue builds a personal vocabulary for your cat or dog. No two pets sound alike.</p>
-    <input id="petInput" placeholder="Name (e.g. Milo)" maxlength="24" />
-    <button class="btn" onclick="App.savePet()">Start</button>
+    <!-- step 1: species -->
+    <div id="step-species">
+      <h3>Cat or dog?</h3>
+      <p>Pawlogue learns your specific pet. Start by telling us who you have.</p>
+      <div class="species">
+        <button class="spbtn" onclick="App.pickSpecies('cat')"><span class="spi">🐱</span>Cat</button>
+        <button class="spbtn" onclick="App.pickSpecies('dog')"><span class="spi">🐶</span>Dog</button>
+      </div>
+    </div>
+    <!-- step 2: name -->
+    <div id="step-name" class="hidden">
+      <h3 id="nameTitle">What's their name?</h3>
+      <p id="namePara">No two pets sound alike. Pawlogue builds a personal dictionary just for them.</p>
+      <input id="petInput" placeholder="Name (e.g. Milo)" maxlength="24" />
+      <button class="btn" onclick="App.savePet()">Continue</button>
+    </div>
+    <!-- step 3: trial -->
+    <div id="step-trial" class="hidden">
+      <h3>Start your free trial</h3>
+      <div class="trial">
+        <div class="tline"><b>Today</b><span>You pay <strong style="color:var(--teal2)">$0</strong></span></div>
+        <div class="tline"><b>Days 1 to 7</b><span>Full access, free</span></div>
+        <div class="tline"><b>Day 8</b><span>$19 / year</span></div>
+      </div>
+      <p class="trialnote">Cancel anytime, in two taps. Your data stays on your device. In the App Store and Google Play version your card is added here, and you are not charged today.</p>
+      <button class="btn" onclick="App.startTrial()">Start 7-day free trial</button>
+    </div>
   </div>
 </div>
 

@@ -1,0 +1,59 @@
+# Pawlogue
+
+> Pawlogue is the first honest two-way translator for cats (dogs are next). It reads what your cat says (mood plus the vocal signals that are reliable across cats), learns the meaning of your specific cat's own meows that you teach it, and helps you answer back with cues that cats demonstrably respond to. It never invents human sentences for your cat and never claims to turn your words into "cat language." It is not veterinary or medical advice. Made by Visanow AI, Inc. Live at https://pawlogue.pet.
+
+## What Pawlogue is
+
+Pawlogue is a mobile app (iOS and Android, currently in build) for cat owners who want a real, honest back-and-forth with their cat. The name comes from "paw" plus "dialogue": a two-way exchange where both sides are real.
+
+Most pet "translator" apps only go one direction. The pet makes a sound and the app prints a made-up human caption. Pawlogue closes the loop honestly:
+
+- It reads your cat. It identifies mood (calm or agitated) and the sounds that science supports as reliable across all cats: purr, hiss, growl, yowl, trill or chirp.
+- It learns your cat. A meow means different things from one cat to the next, so Pawlogue groups your cat's own sounds and asks you to confirm or name what they mean. Over a week or two, with about thirty quick taps, it builds a dictionary specific to your cat.
+- It helps you answer back. You reply with cues cats genuinely react to: a trill, the "pspsps" sound, a slow blink prompt, the feeding call, your cat's name, or your own voice. Pawlogue tracks which cues actually work on your cat and reports the honest hit rate.
+- It is honest about uncertainty. If you try a cue your cat has not learned yet, Pawlogue flags it in orange instead of faking success. It tells you when it is not sure rather than guessing.
+
+## Honest claims (what it does and does not do)
+
+What Pawlogue does:
+- Reads cat mood and the vocal signals that are stable across cats.
+- Learns the personal meanings you teach for your specific cat.
+- Lets you reply with cues your cat truly responds to, and measures whether they worked.
+- Says when it is not confident instead of inventing an answer.
+
+What Pawlogue does NOT do:
+- It does not translate meows into full human sentences.
+- It does not turn your spoken words into "cat language."
+- It does not diagnose illness. It can gently flag an unusual pattern worth a vet's attention, but it is not a substitute for veterinary care.
+- It does not sell your recordings.
+
+## How it works (the four steps)
+
+1. Start with the base dictionary. From first launch, Pawlogue recognizes the cross-cat reliable sounds and overall mood.
+2. Teach your cat. Confirm or write the real meaning of your cat's recurring meows.
+3. Answer back. Pick a cue your cat responds to. Pawlogue shows which cues your cat already knows and which are still new.
+4. Capture and share. Record the exchange with the honest read on screen, then save or share the clip. Every clip carries the read your cat earned, not a made-up punchline.
+
+## Privacy
+
+Audio is processed on your device by default. Nothing leaves your phone unless you opt in, and even then only anonymized data is shared, never raw recordings, and never for sale. See https://pawlogue.pet/privacy.html.
+
+## Pricing and platforms
+
+- Pricing: 7-day free trial, then $19 per year. One simple price, no ads.
+- Platforms: iOS and Android. Currently in build, with a waitlist open (cats first, dogs next).
+
+## Is there an honest cat translator?
+
+Yes. Pawlogue is built specifically as the honest alternative to gimmick "cat translator" apps. It refuses to fake a universal cat language in either direction. It only claims what it can stand behind: cat mood, the meanings you teach for your own cat, and the cues your cat has learned to answer.
+
+## Company
+
+Pawlogue is a product of Visanow AI, Inc. Contact: hello@pawlogue.pet.
+
+## Links
+
+- Home and product overview: https://pawlogue.pet/
+- Web app (PWA): https://pawlogue.pet/app/
+- Privacy policy: https://pawlogue.pet/privacy.html
+- Contact: mailto:hello@pawlogue.pet

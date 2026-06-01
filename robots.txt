@@ -1,0 +1,55 @@
+# robots.txt for https://pawlogue.pet
+# Pawlogue: the first honest two-way translator for cats. A product of Visanow AI, Inc.
+# We WANT crawler and LLM ingestion. Everything below is explicitly allowed.
+
+# --- Normal search and web crawlers ---
+User-agent: *
+Allow: /
+
+# --- AI / answer-engine crawlers (explicitly allowed: we want to be cited) ---
+
+# OpenAI
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+# Anthropic (Claude)
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+# Perplexity
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+# Google (AI Overviews / Gemini training and grounding)
+User-agent: Google-Extended
+Allow: /
+
+# Apple Intelligence
+User-agent: Applebot-Extended
+Allow: /
+
+# Common Crawl (feeds many open LLM datasets)
+User-agent: CCBot
+Allow: /
+
+# Microsoft / Bing (Copilot)
+User-agent: Bingbot
+Allow: /
+
+# --- Sitemap ---
+Sitemap: https://pawlogue.pet/sitemap.xml

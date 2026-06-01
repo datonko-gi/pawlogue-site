@@ -2,6 +2,8 @@
 var App=(function(){
   'use strict';
   var pet=localStorage.getItem('paw_pet')||'';
+  var species=localStorage.getItem('paw_species')||'cat';
+  var pendingName='';
   var recording=false, last=null, db=null;
   var LABELS=['Hungry / food','Let me in / out','Wants attention','Greeting','Play','Distress','Other'];
   var BASE=[
@@ -30,19 +32,30 @@ var App=(function(){
 
   function init(){
     openDB();
-    if(!pet){ $('petModal').classList.remove('hidden'); }
+    if(!pet){ showWizard('species'); }
     else setPet(pet);
     buildChips(); renderDict(); renderLog(); renderBaseDict(); buildCues('talkCues'); buildCues('replyCues');
   }
   function setText(id,t){var e=$(id);if(e)e.textContent=t;}
-  function setPet(n){pet=n;localStorage.setItem('paw_pet',n);$('petName').textContent=n;$('petName2').textContent=n;
+  function showWizard(step){$('petModal').classList.remove('hidden');
+    ['species','name','trial'].forEach(function(s){$('step-'+s).classList.toggle('hidden',s!==step);});}
+  function pickSpecies(s){species=s;localStorage.setItem('paw_species',s);
+    var w=s==='dog'?'dog':'cat';
+    setText('nameTitle','What is your '+w+"'s name?");
+    $('namePara').textContent='No two '+w+'s sound alike. Pawlogue builds a personal dictionary just for them.';
+    showWizard('name'); setTimeout(function(){var i=$('petInput');if(i)i.focus();},60);}
+  function savePet(){var v=$('petInput').value.trim();if(!v)return; pendingName=v; showWizard('trial');}
+  function startTrial(){ var n=pendingName||pet||'Milo'; setPet(n);
+    localStorage.setItem('paw_onboarded','1'); $('petModal').classList.add('hidden'); toast('Welcome, '+n+' 🐾'); }
+  function setPet(n){pet=n;localStorage.setItem('paw_pet',n);localStorage.setItem('paw_species',species);
+    $('petName').textContent=n;$('petName2').textContent=n;
+    $('petEmoji').textContent=(species==='dog'?'🐶 ':'🐱 ');
     $('moodline').textContent='Tap to hear what '+n+' is saying';
     $('dictTitle').textContent=n+"'s vocabulary";
     setText('talkName',n);setText('replyName',n);setText('reactName',n);setText('taughtName',n);
     var rn=document.querySelectorAll('.rnm');for(var i=0;i<rn.length;i++)rn[i].textContent=n;
     buildCues('talkCues');buildCues('replyCues');}
-  function editPet(){$('petInput').value=pet;$('petModal').classList.remove('hidden');}
-  function savePet(){var v=$('petInput').value.trim();if(!v)return;setPet(v);$('petModal').classList.add('hidden');toast('Hi '+v+' 🐾');}
+  function editPet(){pendingName=pet;$('petInput').value=pet;showWizard('species');}
 
   function go(v){['listen','talk','dict','log'].forEach(function(x){$('view-'+x).classList.toggle('hidden',x!==v);$('nav-'+x).classList.toggle('active',x===v);});
     if(v==='dict'){renderDict();renderBaseDict();} if(v==='log')renderLog();
@@ -187,6 +200,6 @@ var App=(function(){
   function drawWave(data){var bars=$('wave').children;if(!bars.length)buildWave();bars=$('wave').children;var step=Math.floor(data.length/bars.length)||1;
     for(var i=0;i<bars.length;i++){var v=data[i*step]/255;bars[i].style.height=(6+v*40)+'px';}}
 
-  return {init:init,editPet:editPet,savePet:savePet,go:go,toggleRec:toggleRec,startTeach:startTeach,closeSheet:closeSheet,reacted:reacted,sayParse:sayParse};
+  return {init:init,editPet:editPet,savePet:savePet,pickSpecies:pickSpecies,startTrial:startTrial,go:go,toggleRec:toggleRec,startTeach:startTeach,closeSheet:closeSheet,reacted:reacted,sayParse:sayParse};
 })();
 document.addEventListener('DOMContentLoaded',App.init);
