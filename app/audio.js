@@ -123,8 +123,10 @@
         if(stream)stream.getTracks().forEach(function(t){t.stop();});
         if(analyser){analyser.disconnect();analyser=null;}
         blob.arrayBuffer().then(function(ab){return ctx.decodeAudioData(ab.slice(0));}).then(function(audioBuf){
-          var f=analyze(audioBuf); res({blob:blob,features:f,classify:classify(f),vector:f?vector(f):null});
-        }).catch(function(){res({blob:blob,features:null,classify:null,vector:null});});
+          var f=analyze(audioBuf);
+          var pcm=null; try{ pcm=audioBuf.getChannelData(0).slice(); }catch(_){}
+          res({blob:blob,features:f,classify:classify(f),vector:f?vector(f):null,pcm:pcm,sampleRate:audioBuf.sampleRate});
+        }).catch(function(){res({blob:blob,features:null,classify:null,vector:null,pcm:null,sampleRate:0});});
       };
       mediaRec.stop();
     });

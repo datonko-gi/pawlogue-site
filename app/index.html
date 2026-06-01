@@ -206,7 +206,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   <div class="view hidden" id="view-dict">
     <div class="h2" id="dictTitle">Your pet's vocabulary</div>
     <div class="sub" id="dictSub">The base sounds work from day one. The meows you teach are unique to your cat.</div>
-    <div class="seclabel">Base dictionary · reliable across all cats</div>
+    <div class="seclabel">Base dictionary · what the on-device model recognizes</div>
     <div id="baseDict"></div>
     <div class="seclabel">Taught · <span id="taughtName">your cat</span> only</div>
     <div id="dictList"></div>
@@ -314,6 +314,8 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
+<script src="engine/pawengine.js"></script>
 <script src="audio.js"></script>
 <script src="talk.js"></script>
 <script src="app.js"></script>

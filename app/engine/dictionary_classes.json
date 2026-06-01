@@ -1,0 +1,209 @@
+{
+  "head": "cat_dictionary",
+  "front_end": "mfcc-85 (same as affect)",
+  "onnx_input_name": "mfcc_feat",
+  "onnx_input_shape": [
+    1,
+    85
+  ],
+  "onnx_output_name": "prob",
+  "classes": [
+    {
+      "id": "Content",
+      "label": "Content / relaxed",
+      "meaning": "Low-arousal positive or relaxed vocalization (a content meow, purr-like or resting sound)."
+    },
+    {
+      "id": "Angry",
+      "label": "Angry",
+      "meaning": "High-arousal angry vocalization, often before or during a confrontation."
+    },
+    {
+      "id": "Defense",
+      "label": "Defensive",
+      "meaning": "Defensive vocalization: backing off a threat, hiss-like guarding."
+    },
+    {
+      "id": "Fighting",
+      "label": "Fighting",
+      "meaning": "Active fight vocalization during a physical confrontation."
+    },
+    {
+      "id": "Warning",
+      "label": "Warning",
+      "meaning": "A warning vocalization telling another animal or person to keep back."
+    },
+    {
+      "id": "Mating",
+      "label": "Mating call",
+      "meaning": "Estrus / mating call (the long howling caterwaul)."
+    },
+    {
+      "id": "MotherCall",
+      "label": "Mother call",
+      "meaning": "Maternal chirp or trill a queen uses to call her kittens."
+    },
+    {
+      "id": "Hunting",
+      "label": "Hunting / prey chatter",
+      "meaning": "Chatter or trilling aimed at prey (the hunting 'ekekek')."
+    }
+  ],
+  "dropped": {
+    "Paining": "Holdout F1 0.18 (unlearnable on the 124-clip open data) and a clinical label we must not assert. Pain stays a vet referral, not a translated verdict."
+  },
+  "merged": {
+    "Content": "Happy + Resting merged (both low-arousal positive/relaxed; they confused with each other on the holdout, F1 jumps to 0.67 merged)."
+  },
+  "source": "Openly-available CatSoundV2 union (Kaggle yagtapandeya 10/class + prior on-disk 5/class sample, deduped) = 124 clips. The full ~3000-clip CatSoundV2 DB is author-gated and not openly downloadable; this is the maximum honest open data.",
+  "honest_holdout": {
+    "protocol": "StratifiedGroupKFold by clip, 5-fold, pooled out-of-fold; each clip tested once as held-out. Clip-level MFCC+LogReg (class_weight=balanced). NO recording-id grouping available in CatSoundV2 filenames, so the group = the clip (documented limitation, same as dog_affect).",
+    "n_clips": 114,
+    "n_splits": 5,
+    "accuracy": 0.7192982456140351,
+    "macro_f1": 0.7185732666156504,
+    "majority_baseline": 0.21929824561403508,
+    "classes": [
+      "Content",
+      "Angry",
+      "Defense",
+      "Fighting",
+      "Warning",
+      "Mating",
+      "MotherCall",
+      "Hunting"
+    ],
+    "per_class": {
+      "Content": {
+        "precision": 0.75,
+        "recall": 0.6,
+        "f1": 0.6666666666666666,
+        "support": 25
+      },
+      "Angry": {
+        "precision": 0.8571428571428571,
+        "recall": 0.8,
+        "f1": 0.8275862068965517,
+        "support": 15
+      },
+      "Defense": {
+        "precision": 0.7857142857142857,
+        "recall": 0.7333333333333333,
+        "f1": 0.7586206896551724,
+        "support": 15
+      },
+      "Fighting": {
+        "precision": 0.625,
+        "recall": 0.6666666666666666,
+        "f1": 0.6451612903225806,
+        "support": 15
+      },
+      "Warning": {
+        "precision": 0.6666666666666666,
+        "recall": 0.6,
+        "f1": 0.631578947368421,
+        "support": 10
+      },
+      "Mating": {
+        "precision": 0.7058823529411765,
+        "recall": 0.9230769230769231,
+        "f1": 0.8,
+        "support": 13
+      },
+      "MotherCall": {
+        "precision": 0.75,
+        "recall": 0.8181818181818182,
+        "f1": 0.782608695652174,
+        "support": 11
+      },
+      "Hunting": {
+        "precision": 0.5833333333333334,
+        "recall": 0.7,
+        "f1": 0.6363636363636364,
+        "support": 10
+      }
+    },
+    "confusion_rows_true": [
+      [
+        15,
+        0,
+        0,
+        4,
+        2,
+        0,
+        2,
+        2
+      ],
+      [
+        1,
+        12,
+        0,
+        0,
+        0,
+        2,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        11,
+        1,
+        1,
+        0,
+        0,
+        2
+      ],
+      [
+        1,
+        1,
+        3,
+        10,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        6,
+        2,
+        1,
+        1
+      ],
+      [
+        0,
+        1,
+        0,
+        0,
+        0,
+        12,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        9,
+        0
+      ],
+      [
+        2,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        7
+      ]
+    ]
+  }
+}

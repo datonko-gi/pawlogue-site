@@ -1,0 +1,56 @@
+{
+  "input_audio": {
+    "sample_rate": 16000,
+    "channels": 1,
+    "dtype": "float32 in [-1,1]"
+  },
+  "exp03_soundtype": {
+    "front_end": "logmel",
+    "logmel": {
+      "n_fft": 512,
+      "win_length": 400,
+      "hop_length": 160,
+      "n_mels": 64,
+      "power": 2.0,
+      "to_db": true,
+      "top_db": 80.0,
+      "mel_scale": "htk-like (torchaudio default)",
+      "f_min": 0.0,
+      "f_max": 8000.0,
+      "fixed_frames": 96,
+      "window": "center-crop or zero-pad to fixed_frames, then per-clip standardize (x-mean)/(std+1e-5)"
+    },
+    "onnx_input_name": "logmel",
+    "onnx_input_shape": [
+      1,
+      1,
+      64,
+      96
+    ],
+    "decision": "predict 'cat' only if prob[cat] >= cat_threshold (in the .pt checkpoint, ~0.80). Below threshold => 'no result / hard to tell'. Conservative on purpose."
+  },
+  "exp02_affect": {
+    "front_end": "mfcc",
+    "mfcc": {
+      "n_mfcc": 20,
+      "vector": "concat[ mfcc.mean(20), mfcc.std(20), delta.mean(20), delta.std(20), spectral_centroid.mean, spectral_centroid.std, zcr.mean, zcr.std, duration_sec ] = 85 dims",
+      "note": "librosa defaults (n_fft 2048, hop 512) over the full clip at 16 kHz mono. Matches EXP-01/EXP-02 feature. Standardize is inside the ONNX graph."
+    },
+    "onnx_input_name": "mfcc_feat",
+    "onnx_input_shape": [
+      1,
+      85
+    ],
+    "applies_to": ["exp02_affect.onnx", "cat_affect.onnx", "dog_affect.onnx", "cat_dictionary.onnx"]
+  },
+  "cat_dictionary": {
+    "front_end": "mfcc-85 (identical to exp02_affect; compute the MFCC-85 vector once and feed both cat_affect.onnx and cat_dictionary.onnx)",
+    "onnx_input_name": "mfcc_feat",
+    "onnx_input_shape": [1, 85],
+    "onnx_output_name": "prob",
+    "classes_file": "dictionary_classes.json",
+    "n_classes": 8,
+    "decision": "argmax over the 8 classes is the top sound type; surface the full sorted list. Only meaningful when the cat detector accepts the clip (isCat). Confidence stays qualitative (clean/most-likely/possibly/hard-to-tell), never a percentage."
+  },
+  "note": "STFT/mel intentionally not in-graph (ORT-Web WASM STFT support is unreliable). Client computes features with these exact params then runs the ONNX model. Same split YAMNet/PANNs mobile ports use."
+}

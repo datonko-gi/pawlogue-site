@@ -5,6 +5,17 @@ var App=(function(){
   var species=localStorage.getItem('paw_species')||'cat';
   var pendingName='';
   var recording=false, last=null, db=null;
+  var engineReady=false, DICT_CLASSES=[];
+  var DICT_EMOJI={Content:'😌',Angry:'😾',Defense:'🙀',Fighting:'😼',Warning:'😼',Mating:'🌙',MotherCall:'🐈',Hunting:'🪶'};
+  function dictMeaning(id){for(var i=0;i<DICT_CLASSES.length;i++)if(DICT_CLASSES[i].id===id)return DICT_CLASSES[i].meaning;return '';}
+  function initEngine(){
+    if(typeof PawEngine==='undefined'||typeof ort==='undefined'){return;}
+    try{ ort.env.wasm.wasmPaths='https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/'; }catch(_){}
+    fetch('engine/dictionary_classes.json').then(function(r){return r.json();}).then(function(d){DICT_CLASSES=d.classes||[];renderBaseDict();}).catch(function(){});
+    PawEngine.init('engine/').then(function(){engineReady=true;
+      var h=$('hint'); if(h)h.textContent='Real on-device model loaded. Tap to listen.';
+    }).catch(function(){engineReady=false;});
+  }
   var LABELS=['Hungry / food','Let me in / out','Wants attention','Greeting','Play','Distress','Other'];
   var BASE=[
     {snd:'Purr-like rumble',mean:'Content, calm, self-soothing'},
@@ -36,6 +47,7 @@ var App=(function(){
     else setPet(pet);
     buildChips(); renderDict(); renderLog(); renderBaseDict(); renderTips(); buildCues('talkCues'); buildCues('replyCues');
     var si=$('sayInput'); if(si) si.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); sayParse(); } });
+    initEngine();
   }
   function renderTips(){var el=$('tipsList');if(!el)return;el.innerHTML='';
     PawTalk.TIPS.forEach(function(t){var d=document.createElement('div');d.className='tip';
@@ -82,8 +94,12 @@ var App=(function(){
     $('hint').textContent='Analyzing...';
     PawAudio.stopRec().then(function(r){
       $('hint').textContent='On-device and honest. We read mood, never fake words.';
-      if(!r||!r.classify){ showUnclear(); return; }
-      last=r; showResult(r);
+      if(!r){ showUnclear(); return; }
+      last=r;
+      if(engineReady && r.pcm && r.pcm.length){
+        PawEngine.analyze(r.pcm, r.sampleRate).then(function(eng){ showResultReal(eng,r); })
+          .catch(function(){ if(r.classify) showResult(r); else showUnclear(); });
+      } else if(r.classify){ showResult(r); } else { showUnclear(); }
     });
   }
 
@@ -94,13 +110,8 @@ var App=(function(){
     $('rnote').textContent=''; openSheet();
   }
 
-  function showResult(r){
-    var c=r.classify;
-    $('rtype').textContent='SOUND · '+c.soundType.toUpperCase();
-    $('rmain').textContent=c.emoji+'  '+affectShort(c.affect);
-    $('rsub').textContent=c.affect;
-    setBars(c.confidence, confWord(c.confidence));
-    // personalization
+  // Tier-2 personal match (owner-taught prototypes), shared by both result paths
+  function showTier2(r){
     allProto().then(function(ps){
       var t2=$('tier2');
       if(ps.length && r.vector){
@@ -108,12 +119,45 @@ var App=(function(){
         ps.forEach(function(p){var d=PawAudio.dist(p.vector,r.vector);if(d<bd){bd=d;best=p;}});
         if(best && bd<0.62){
           var n=pet||'your pet';
-          $('t2q').textContent='“'+best.label+'” — '+n+' has made this sound before.';
+          $('t2q').textContent='"'+best.label+'": '+n+' has made this sound before.';
           $('t2src').textContent='Matched to what you taught ('+countLabel(ps,best.label)+' example'+(countLabel(ps,best.label)>1?'s':'')+'). Closeness '+Math.round((1-bd)*100)+'%.';
           t2.classList.remove('hidden');
         } else t2.classList.add('hidden');
       } else t2.classList.add('hidden');
     });
+  }
+
+  // REAL on-device model result (PawEngine)
+  function showResultReal(eng,r){
+    if(!eng){ if(r&&r.classify) return showResult(r); return showUnclear(); }
+    if(!eng.isCat){
+      $('rtype').textContent='HMM';
+      $('rmain').textContent='🐾 No clear cat sound';
+      $('rsub').textContent='Try again a bit closer, when '+(pet||'your cat')+' actually vocalizes.';
+      setBars(1,'Hard to tell'); $('tier2').classList.add('hidden'); $('labelArea').classList.add('hidden');
+      $('rnote').textContent='Real on-device model. It says "not sure" instead of guessing.';
+      openSheet(); return;
+    }
+    var top=eng.soundClasses[0], emoji=DICT_EMOJI[top.id]||'🐱';
+    var alt=eng.soundClasses.slice(1,3).filter(function(x){return x.prob>0.12;}).map(function(x){return x.label.toLowerCase();});
+    $('rtype').textContent='CAT SOUND · ON-DEVICE MODEL';
+    $('rmain').textContent=emoji+'  '+top.label;
+    $('rsub').textContent=dictMeaning(top.id)+(alt.length?(' Maybe also '+alt.join(' or ')+'.'):'');
+    setBars(eng.confidence, confWord(eng.confidence));
+    showTier2(r);
+    $('labelArea').classList.add('hidden');
+    $('rnote').textContent='Real on-device model read, not a guess. This is mood and sound, not words. New or persistent odd sounds: see a vet. Not veterinary advice.';
+    logResult({soundType:top.label,affect:eng.affect,emoji:emoji,confidence:eng.confidence});
+    openSheet();
+  }
+
+  function showResult(r){
+    var c=r.classify;
+    $('rtype').textContent='SOUND · '+c.soundType.toUpperCase();
+    $('rmain').textContent=c.emoji+'  '+affectShort(c.affect);
+    $('rsub').textContent=c.affect;
+    setBars(c.confidence, confWord(c.confidence));
+    showTier2(r);
     $('labelArea').classList.add('hidden');
     $('rnote').textContent='Affect, not words. If a sound is new or you hear it a lot and seems off, a vet check is worth it. Pawlogue is not veterinary advice.';
     logResult(c);
@@ -150,7 +194,10 @@ var App=(function(){
 
   // ---- base dictionary (day-0, cross-cat stable) ----
   function renderBaseDict(){var el=$('baseDict');if(!el)return;el.innerHTML='';
-    BASE.forEach(function(b){var d=document.createElement('div');d.className='bdcard';
+    var list=(DICT_CLASSES&&DICT_CLASSES.length)
+      ? DICT_CLASSES.map(function(c){return {snd:c.label,mean:c.meaning};})
+      : BASE;
+    list.forEach(function(b){var d=document.createElement('div');d.className='bdcard';
       d.innerHTML='<div><div class="dl"><span class="dot base"></span>'+b.snd+'</div><div class="dm">'+b.mean+'</div></div>';
       el.appendChild(d);});}
 
