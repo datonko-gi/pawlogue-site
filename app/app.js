@@ -186,15 +186,19 @@ var App=(function(){
   // ---- recording ----
   function toggleRec(){ recording?stop():start(); }
   function start(){
-    recording=true; var btn=$('recbtn'); btn.textContent='■ Stop'; btn.classList.add('live'); $('ring').classList.add('pulse');
+    recording=true; var btn=$('recbtn'); btn.textContent='● REC'; btn.classList.add('live'); $('ring').classList.add('pulse');
     $('moodline').textContent='🔴 Listening to '+(pet||'your cat')+'...';
-    $('hint').textContent='Tap the circle to stop when '+(pet||'your cat')+' finishes.';
+    $('hint').textContent='Recording. Tap the circle again when '+(pet||'your cat')+' finishes.';
     buildWave();
-    PawAudio.startRec(function(data,level){ drawWave(data); }).catch(function(){
+    PawAudio.startRec(function(data,level){ drawWave(data); }).catch(function(err){
       recording=false;btn.textContent='Listen';btn.classList.remove('live');$('ring').classList.remove('pulse');
-      $('moodline').textContent='Tap to hear what '+(pet||'your cat')+' is saying';
-      $('hint').textContent='Microphone access is needed. Enable it in your browser settings.';
+      micBlocked(err);
     });
+  }
+  function micBlocked(err){
+    $('moodline').textContent='🎤 Microphone is blocked';
+    $('hint').innerHTML='Pawlogue needs the mic to hear '+(pet||'your cat')+'. Tap the <b>⋮</b> menu (top right) → <b>Permissions</b> → <b>Microphone</b> → <b>Allow</b>, then tap Listen again. Or try <b>Hear a demo read</b> below.';
+    toast('Allow the microphone to listen 🎤');
   }
   function stop(){
     recording=false; var btn=$('recbtn'); btn.textContent='Listen'; btn.classList.remove('live'); $('ring').classList.remove('pulse');
