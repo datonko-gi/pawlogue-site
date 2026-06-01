@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Pawlogue, the model</title>
+<meta name="theme-color" content="#12100E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap" rel="stylesheet" />
+<style>
+  :root{--ink:#12100E;--ink2:#1b1814;--ink3:#241f1a;--cream:#F2E8D5;--dim:#cdbfa8;--mut:#8a8070;
+    --amber:#E8A657;--amber2:#f0c389;--teal:#2D8B7A;--teal2:#5bb3a2;--orange:#d98a6e;
+    --line:rgba(242,232,213,.12);--sans:"Plus Jakarta Sans",system-ui,sans-serif;--serif:"Fraunces",Georgia,serif;}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{background:var(--ink);color:var(--cream);font-family:var(--sans);font-size:16px;line-height:1.55;
+    -webkit-font-smoothing:antialiased;padding:0 18px calc(60px + env(safe-area-inset-bottom))}
+  .wrap{max-width:680px;margin:0 auto}
+  a{color:var(--amber)}
+  .top{display:flex;align-items:center;gap:9px;padding:18px 0 6px;font-weight:800;font-size:18px}
+  .top .mk{display:flex;align-items:flex-end;gap:2.5px;height:18px}
+  .top .mk i{width:3px;border-radius:3px;background:var(--amber);display:block}
+  .top .mk i:nth-child(1){height:7px}.top .mk i:nth-child(2){height:16px;background:var(--amber2)}
+  .top .mk i:nth-child(3){height:11px;background:var(--teal)}.top .mk i:nth-child(4){height:14px}
+  h1{font-family:var(--serif);font-weight:500;font-size:30px;letter-spacing:-.01em;margin:18px 0 6px}
+  .lede{color:var(--dim);font-size:15px;margin-bottom:8px}
+  .back{display:inline-block;margin:6px 0 18px;font-size:14px}
+  h2{font-family:var(--serif);font-weight:500;font-size:22px;margin:34px 0 6px}
+  .sub{color:var(--mut);font-size:13.5px;margin-bottom:14px}
+  .pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:5px 11px;font-size:12.5px;color:var(--dim);margin:0 6px 6px 0}
+  .pill b{color:var(--teal2)}
+  /* live cards */
+  .clip{background:var(--ink2);border:1px solid var(--line);border-radius:16px;padding:15px 16px;margin-bottom:12px}
+  .clip .h{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .clip .name{font-weight:700;font-size:15px}
+  .clip .play{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--ink3);color:var(--amber);font-size:15px;cursor:pointer;flex-shrink:0}
+  .clip .verdict{font-family:var(--serif);font-size:18px;margin:9px 0 3px}
+  .clip .vsub{font-size:12.5px;color:var(--mut)}
+  .bars{margin-top:11px;display:flex;flex-direction:column;gap:5px}
+  .bar{display:grid;grid-template-columns:120px 1fr 42px;align-items:center;gap:9px;font-size:12px}
+  .bar .lab{color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bar .track{height:7px;border-radius:5px;background:rgba(242,232,213,.08);overflow:hidden}
+  .bar .fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--amber),var(--teal))}
+  .bar .pct{color:var(--mut);text-align:right}
+  .bar.top .lab{color:var(--amber);font-weight:700}
+  .loading{color:var(--mut);font-size:13px;padding:10px 0}
+  /* table */
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:6px}
+  th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
+  th{color:var(--mut);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  td.n{font-variant-numeric:tabular-nums;color:var(--dim)}
+  .f1bar{display:inline-block;height:7px;border-radius:4px;background:var(--teal);vertical-align:middle}
+  .card{background:var(--ink2);border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin-bottom:12px}
+  .card h3{font-size:15px;margin-bottom:7px}
+  .card p{color:var(--dim);font-size:14px;margin-bottom:7px}
+  .k{display:flex;justify-content:space-between;gap:12px;font-size:14px;padding:7px 0;border-bottom:1px solid var(--line)}
+  .k:last-child{border:none}.k span:first-child{color:var(--mut)}.k span:last-child{color:var(--cream);font-weight:600;text-align:right}
+  .note{font-size:12.5px;color:var(--mut);line-height:1.5;margin-top:8px}
+  .warn{color:var(--orange)}
+</style>
+</head>
+<body><div class="wrap">
+  <div class="top"><span class="mk"><i></i><i></i><i></i><i></i></span>Pawlogue</div>
+  <h1>The on-device model</h1>
+  <div class="lede">This is the real model that runs inside the app, on your phone, with no server. Everything below is honest: real holdout numbers, the real classes, and the model running live on real clips right here in your browser.</div>
+  <a class="back" href="./">&larr; Back to the app</a>
+
+  <h2>Hear it on all 8 sounds</h2>
+  <div class="sub">One real clip per class, run live through the exact on-device model as the page loads. Tap play to listen. The bars are the 8-class dictionary read. The "detector" line is a separate gate: it is meow-trained, so some loud non-meow clips (a defensive yowl, a fight) score low and would be held back as "not sure" in the app. The honest held-out accuracy per class is in the table below, these clips just let you hear the model run.</div>
+  <div id="live"><div class="loading">Loading the model and classifying 8 clips...</div></div>
+
+  <h2>The 8 classes it knows</h2>
+  <div class="sub">Cross-validated holdout (5-fold). Overall test accuracy 71.9%, macro-F1 0.72, versus a 21.9% guess baseline. Trained on 124 open clips, so this is the day-0 base that per-cat learning refines.</div>
+  <table id="classtbl"><thead><tr><th>Class</th><th>What it means</th><th>F1</th><th>Clips</th></tr></thead><tbody></tbody></table>
+  <div class="note">Dropped on purpose: <b class="warn">Paining</b> (pain). It scored too low to be honest AND pain is a clinical call we must never assert. Pain stays a "see a vet" nudge, never a translated verdict. Merged: Happy and Resting into <b>Content</b> (both calm-positive, they blended together).</div>
+
+  <h2>What ships, and how big</h2>
+  <div class="card" id="sizes"></div>
+
+  <h2>How it was trained</h2>
+  <div class="card">
+    <p><b>Protocol:</b> 80/10/10 train/validation/test (the dictionary uses 5-fold cross-validation because only 124 clips exist). Class-balanced batches, so no class is starved. Group-level splits where IDs exist, so the same recording never leaks across train and test. The test set never touched training.</p>
+    <p><b>Architecture:</b> the cat-vs-not-cat detector is a small log-mel CNN. The dictionary and the calm-vs-distress affect heads are MFCC features plus logistic regression (the honest winner on small data). Trained from scratch, no giant pretrained backbone, to stay tiny and run fully offline.</p>
+    <p><b>Honesty check (parity):</b> the feature math in the browser was verified to match the Python training pipeline (log-mel within 3.8e-4, MFCC within 7e-3). That is why the verdict you see in the app is the real model output, not an approximation.</p>
+  </div>
+
+  <h2>Detector and affect</h2>
+  <div class="card">
+    <div class="k"><span>Cat vs not-cat detector</span><span>~89 to 90% test</span></div>
+    <div class="k"><span>Affect (calm vs distress)</span><span>70.5% test</span></div>
+    <div class="k"><span>Per-cat personalization (Tier 2)</span><span>80% within-cat, validated</span></div>
+    <div class="note">The detector is the gate: if it does not hear a clear cat, the app says "not sure" instead of guessing. Non-cat noise (a vacuum, a door) is rejected, not translated.</div>
+  </div>
+
+  <h2>Honest limits</h2>
+  <div class="card">
+    <p>The full CatSoundV2 database (about 3000 clips) is gated by its authors and is not openly downloadable, so 124 clips is today's ceiling. With the full set, every class would likely pass 0.8 F1 and we could re-admit Paining and split Happy from Resting.</p>
+    <p>This base model is universal (works day one on any cat). The real magic is Tier-2: it learns YOUR cat's own meows, which pushes accuracy to ~80% for that cat. The base is the cold start, the personalization is the moat.</p>
+    <p class="note">Confidence is always shown as a band (clean / most-likely / possibly / hard-to-tell), never a fake percentage, because a percentage on this data would not be honest.</p>
+  </div>
+
+  <a class="back" href="./">&larr; Back to the app</a>
+  <div style="height:24px"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
+<script src="engine/pawengine.js"></script>
+<script>
+(function(){
+  'use strict';
+  // class meanings + F1 (from the holdout)
+  var CLASSES=[
+    {id:'Content',label:'Content / relaxed',mean:'Low-arousal positive or relaxed sound (content meow, purr-like, resting).',f1:0.67,n:25},
+    {id:'Angry',label:'Angry',mean:'High-arousal angry vocalization, often before or during a confrontation.',f1:0.83,n:15},
+    {id:'Defense',label:'Defensive',mean:'Backing off a threat, hiss-like guarding.',f1:0.76,n:15},
+    {id:'Fighting',label:'Fighting',mean:'Active fight vocalization during a physical confrontation.',f1:0.65,n:15},
+    {id:'Warning',label:'Warning',mean:'Telling another animal or person to keep back.',f1:0.63,n:10},
+    {id:'Mating',label:'Mating call',mean:'Estrus / mating call (the long howling caterwaul).',f1:0.80,n:13},
+    {id:'MotherCall',label:'Mother call',mean:'Maternal chirp or trill a queen uses to call her kittens.',f1:0.78,n:11},
+    {id:'Hunting',label:'Hunting / prey chatter',mean:'Chatter or trilling aimed at prey (the hunting ekekek).',f1:0.64,n:10}
+  ];
+  // class table
+  (function(){
+    var tb=document.querySelector('#classtbl tbody');
+    CLASSES.forEach(function(c){
+      var tr=document.createElement('tr');
+      tr.innerHTML='<td><b>'+c.label+'</b></td><td style="color:var(--dim)">'+c.mean+'</td>'+
+        '<td class="n">'+c.f1.toFixed(2)+' <span class="f1bar" style="width:'+Math.round(c.f1*46)+'px"></span></td>'+
+        '<td class="n">'+c.n+'</td>';
+      tb.appendChild(tr);
+    });
+  })();
+  // sizes card
+  document.getElementById('sizes').innerHTML=
+    '<div class="k"><span>Cat detector (CNN)</span><span>365 KB &middot; 99 KB int8</span></div>'+
+    '<div class="k"><span>Dictionary (8-class)</span><span>3.7 KB</span></div>'+
+    '<div class="k"><span>Affect head</span><span>1.6 KB</span></div>'+
+    '<div class="k"><span>Runs</span><span>fully on-device, offline</span></div>';
+
+  // live demo
+  var SAMPLES=[
+    {id:'Content',label:'Content / relaxed (resting cat)'},
+    {id:'Angry',label:'Angry cat'},
+    {id:'Defensive',label:'Defensive cat',cls:'Defense'},
+    {id:'Fighting',label:'Fighting cats'},
+    {id:'Warning',label:'Warning'},
+    {id:'Mating',label:'Mating call'},
+    {id:'MotherCall',label:'Mother call'},
+    {id:'Hunting',label:'Hunting / prey chatter'}
+  ];
+  var labelOf={};CLASSES.forEach(function(c){labelOf[c.id]=c.label;});
+  var ac;
+  function getAC(){ ac=ac||new (window.AudioContext||window.webkitAudioContext)(); if(ac.state==='suspended')ac.resume(); return ac; }
+  function play(url){ try{ var a=new Audio(url); a.play(); }catch(e){} }
+
+  function card(s){
+    var el=document.createElement('div'); el.className='clip'; el.id='clip-'+s.id;
+    el.innerHTML='<div class="h"><div class="name">'+s.label+'</div>'+
+      '<button class="play" title="play">&#9654;</button></div>'+
+      '<div class="verdict">...</div><div class="vsub"></div><div class="bars"></div>';
+    el.querySelector('.play').onclick=function(){ play('model_samples/'+s.id+'.mp3'); };
+    return el;
+  }
+  function renderResult(el, r){
+    var top=r.soundClasses[0];
+    // Always show the 8-class dictionary read (that is the part that knows the sounds).
+    el.querySelector('.verdict').textContent=top.label;
+    var gate = r.isCat
+      ? ('detector ' + (r.catProb*100).toFixed(0) + '% cat (passes the gate)')
+      : ('detector ' + (r.catProb*100).toFixed(0) + '% cat (in-app this would be held back as "not sure")');
+    el.querySelector('.vsub').textContent='dictionary read: '+confWord(r.confidence)+', affect: '+r.affect+', '+gate;
+    var bars=el.querySelector('.bars'); bars.innerHTML='';
+    r.soundClasses.forEach(function(c,i){
+      var b=document.createElement('div'); b.className='bar'+(i===0?' top':'');
+      b.innerHTML='<div class="lab">'+c.label+'</div><div class="track"><div class="fill" style="width:'+Math.round(c.prob*100)+'%"></div></div><div class="pct">'+Math.round(c.prob*100)+'%</div>';
+      bars.appendChild(b);
+    });
+  }
+  function confWord(n){return ['','hard to tell','possibly','most likely','clean'][n]||'';}
+
+  async function run(){
+    var host=document.getElementById('live');
+    try{
+      ort.env.wasm.wasmPaths='https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/';
+      await PawEngine.init('engine/');
+    }catch(e){ host.innerHTML='<div class="loading warn">Could not load the model: '+(e&&e.message||e)+'. Open this over https, not as a file.</div>'; return; }
+    host.innerHTML='';
+    var cards=SAMPLES.map(function(s){ var c=card(s); host.appendChild(c); return c; });
+    for(var i=0;i<SAMPLES.length;i++){
+      var s=SAMPLES[i], el=cards[i];
+      try{
+        var buf=await (await fetch('model_samples/'+s.id+'.mp3')).arrayBuffer();
+        var ab=await getAC().decodeAudioData(buf.slice(0));
+        var r=await PawEngine.analyze(ab.getChannelData(0), ab.sampleRate);
+        renderResult(el, r);
+      }catch(e){ el.querySelector('.verdict').textContent='error'; el.querySelector('.vsub').textContent=String(e&&e.message||e); }
+    }
+  }
+  if(typeof PawEngine==='undefined'||typeof ort==='undefined'){
+    document.getElementById('live').innerHTML='<div class="loading warn">Engine scripts did not load.</div>';
+  } else { run(); }
+})();
+</script>
+</body>
+</html>
