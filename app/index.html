@@ -57,10 +57,12 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 .hint{margin-top:26px;color:var(--mut);font-size:14px;max-width:30ch}
 .demobtn{margin-top:16px;background:none;border:1px solid var(--line);color:var(--amber);font-family:inherit;font-weight:600;font-size:13.5px;padding:9px 16px;border-radius:999px;cursor:pointer}
 .demobtn:active{border-color:var(--amber)}
-.saybtn{display:block;margin:14px auto 0;background:none;border:none;color:var(--mut);font-family:inherit;font-size:13px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
-.saybtn:hover{color:var(--amber)}
-.wave{display:flex;align-items:center;gap:3px;height:46px;margin-top:8px}
-.wave i{width:3px;border-radius:3px;background:var(--amber);height:6px;transition:height .08s linear}
+.saybtn{display:inline-block;margin:16px auto 0;background:var(--ink3);border:1px solid var(--line);color:var(--cream);font-family:inherit;font-weight:600;font-size:14px;padding:11px 20px;border-radius:999px;cursor:pointer}
+.saybtn:active{border-color:var(--amber);transform:scale(.97)}
+.wave{display:none;align-items:center;justify-content:center;gap:3px;height:64px;margin:18px auto 0;padding:10px 20px;
+  background:rgba(232,166,87,.08);border:1px solid rgba(232,166,87,.22);border-radius:999px;max-width:300px}
+.wave.on{display:flex}
+.wave i{width:4px;border-radius:4px;background:var(--amber);height:5px;transition:height .07s linear}
 
 /* RESULT card */
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:30;max-width:560px;margin:0 auto;
@@ -69,7 +71,14 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   max-height:calc(100vh - 10px);max-height:calc(100dvh - 10px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
   transition:transform .42s cubic-bezier(.2,.8,.2,1);box-shadow:0 -20px 60px rgba(0,0,0,.5)}
 .sheet.up{transform:translateY(0)}
-.grip{width:40px;height:4px;border-radius:4px;background:var(--line);margin:0 auto 16px}
+.grip{display:block;width:46px;height:5px;border-radius:4px;background:var(--line);margin:2px auto 16px;border:none;padding:0;cursor:pointer}
+.sheetBackdrop{position:fixed;inset:0;z-index:29;background:rgba(0,0,0,.55);opacity:0;visibility:hidden;transition:opacity .3s}
+.sheetBackdrop.up{opacity:1;visibility:visible}
+.sheetX{position:absolute;top:14px;right:16px;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--ink3);color:var(--cream);font-size:15px;cursor:pointer;z-index:2}
+.answerBtn{display:block;width:100%;margin:18px 0 4px;background:var(--amber);color:#1a1206;border:none;font-family:inherit;font-weight:700;font-size:16px;padding:15px;border-radius:14px;cursor:pointer}
+.answerBtn:active{transform:scale(.98)}
+.doneBtn{display:block;width:100%;margin:12px 0 0;background:transparent;border:1px solid var(--line);color:var(--cream);font-family:inherit;font-weight:600;font-size:15px;padding:13px;border-radius:13px;cursor:pointer}
+.doneBtn:active{border-color:var(--amber)}
 .rtype{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
 .rmain{font-family:var(--serif);font-size:30px;margin:6px 0 2px;letter-spacing:-.01em}
 .rsub{color:var(--dim);font-size:15px}
@@ -243,8 +252,8 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
       </div>
       <div class="wave" id="wave" aria-hidden="true"></div>
       <div class="hint" id="hint">On-device and honest. We read mood, never fake words.</div>
-      <button class="demobtn" id="demoBtn" onclick="App.demoListen()">▶ Hear a demo read</button>
-      <button class="saybtn" onclick="App.go('talk')">Nothing to hear right now? Say something to your cat →</button>
+      <button class="demobtn" id="demoBtn" onclick="App.demoListen()">▶ Hear a sample read (no cat needed)</button>
+      <button class="saybtn" onclick="App.go('talk')">💬 Say something to your cat</button>
     </div>
   </div>
 
@@ -318,8 +327,10 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 </div>
 
 <!-- RESULT SHEET -->
+<div class="sheetBackdrop" id="sheetBackdrop" onclick="App.closeSheet()"></div>
 <div class="sheet" id="sheet">
-  <div class="grip"></div>
+  <button class="grip" onclick="App.closeSheet()" aria-label="Close"></button>
+  <button class="sheetX" onclick="App.closeSheet()" aria-label="Close">✕</button>
   <div class="rtype" id="rtype">SOUND</div>
   <div class="rmain" id="rmain">...</div>
   <div class="rsub" id="rsub"></div>
@@ -329,24 +340,17 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
     <div class="q" id="t2q"></div>
     <div class="src" id="t2src"></div>
   </div>
-  <div id="replyArea">
-    <div class="replyhead">Answer <span id="replyName">your cat</span>, honestly. Play a cue, then say if they reacted:</div>
-    <div class="cues" id="replyCues"></div>
-    <div class="react hidden" id="reactPrompt">
-      <div class="rq">Did <span id="reactName">your cat</span> react to that?</div>
-      <div class="rb"><button class="yes" onclick="App.reacted(1)">Yes, reacted</button><button class="no" onclick="App.reacted(0)">No response</button></div>
-    </div>
-  </div>
+  <button class="answerBtn" id="answerBtn" onclick="App.answerBack()">💬 Answer <span id="answerName">your cat</span> &rarr;</button>
   <div id="labelArea" class="hidden">
     <div class="note" style="margin-top:16px">What did they want? Teach Pawlogue this sound:</div>
     <div class="chips" id="chips"></div>
   </div>
   <div class="racts">
-    <button onclick="App.closeSheet()">Done</button>
-    <button onclick="App.shareCard()">Share</button>
-    <button id="voiceBtn" onclick="App.saveVoice()">+ Voice</button>
-    <button class="primary" id="teachBtn" onclick="App.startTeach()">Teach</button>
+    <button id="teachBtn" onclick="App.startTeach()">📖 Teach this</button>
+    <button id="voiceBtn" onclick="App.saveVoice()">🎙 Save voice</button>
+    <button onclick="App.shareCard()">↗ Share</button>
   </div>
+  <button class="doneBtn" onclick="App.closeSheet()">Done</button>
   <div class="note" id="rnote"></div>
 </div>
 

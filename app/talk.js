@@ -26,14 +26,10 @@
     {id:'kiss', label:'Kiss squeak', icon:'😙', kind:'synth', variants:5,
       basis:'A high kissy squeak. A classic come-here attractor cats turn toward.'},
     {id:'click', label:'Tongue click', icon:'👅', kind:'synth', variants:5,
-      basis:'A "tch-tch" click. Sharp and prey-like, easy for a cat to locate.'},
-    {id:'name', label:'Their name', icon:'🗣', kind:'tts', variants:4,
-      basis:'Cats can learn their own name. Said warm and high, a few ways.'},
-    {id:'feed', label:'Feeding call', icon:'🍽', kind:'tts', variants:5,
-      basis:'Your feeding words. Works through your own cat’s conditioning.'},
-    {id:'herekitty', label:'"Here kitty"', icon:'📣', kind:'tts', variants:4,
-      basis:'The classic call, warm, high and repeated.'}
+      basis:'A "tch-tch" click. Sharp and prey-like, easy for a cat to locate.'}
   ];
+  // Note: the cat's name, feeding words and "here kitty" are things YOU say in your
+  // own voice, so Pawlogue does not robot-voice them. Use your own voice for those.
 
   var TIPS=[
     {icon:'😌', title:'Slow blink', body:'Look at your cat, slowly close your eyes for about a second, then open them. It is a validated "I trust you" signal. Many cats slow-blink back, that is them answering you.'},
@@ -87,25 +83,18 @@
     var total=1;
     if(q.kind==='audio'){ total=q.clips.length; try{ var a=new Audio('sounds/'+pick(q.clips,v)); a.playbackRate=rnd(0.97,1.05); a.volume=1; a.play(); }catch(_){}}
     else if(q.kind==='synth'){ total=q.variants; if(id==='pspsps')pspsps(v); else if(id==='kiss')kiss(v); else if(id==='click')click(v); }
-    else if(q.kind==='tts'){ total=q.variants;
-      if(id==='name'){ var pp=[1.9,1.7,1.6,1.8][v%4], rr=[0.9,1.0,0.85,0.95][v%4]; speak(petName||'kitty', pp, rr); }
-      else if(id==='feed'){ var fp=[(petName?petName+', ':'')+'dinner','here kitty kitty','food time','din din', (petName?petName+', ':'')+'breakfast'][v%5]; speak(fp, rnd(1.5,1.85), rnd(0.9,1.05)); }
-      else { var hk=['here kitty kitty kitty','come here','kitty kitty','psspss come'][v%4]; speak(hk, rnd(1.6,1.9), rnd(0.9,1.0)); } }
     return { variant:(v%total)+1, total:total };
   }
   function cue(id){for(var i=0;i<CUES.length;i++)if(CUES[i].id===id)return CUES[i];return null;}
 
-  var WORDMAP={ 'come':'herekitty','here':'herekitty','kitty':'herekitty','psspss':'pspsps','pspsps':'pspsps',
-    'hey':'name','hi':'trill','hello':'trill','greetings':'trill',
-    'eat':'feed','food':'feed','dinner':'feed','hungry':'feed','treat':'feed','breakfast':'feed','lunch':'feed','dindin':'feed',
+  var WORDMAP={ 'psspss':'pspsps','pspsps':'pspsps',
+    'hi':'trill','hello':'trill','greetings':'trill','chirp':'trill','trill':'trill',
     'meow':'meow','mew':'meow', 'purr':'purr','content':'purr','happy':'purr','relax':'purr','calm':'purr',
     'kiss':'kiss','click':'click' };
   function decompose(text, petName, taughtLabels){
     var words=(text||'').toLowerCase().replace(/[^a-z0-9'\s]/g,' ').split(/\s+/).filter(Boolean);
-    var nameL=(petName||'').toLowerCase();
     var taught=(taughtLabels||[]).map(function(s){return (s||'').toLowerCase();});
     return words.map(function(w){
-      if(nameL && w===nameL) return {word:w, cueId:'name', known:true, src:'cue'};
       if(WORDMAP[w]) return {word:w, cueId:WORDMAP[w], known:true, src:'cue'};
       for(var i=0;i<taught.length;i++){ if(taught[i] && (taught[i].indexOf(w)>=0 || w.indexOf(taught[i])>=0)) return {word:w, cueId:null, known:true, src:'taught'}; }
       return {word:w, cueId:null, known:false, src:null};
