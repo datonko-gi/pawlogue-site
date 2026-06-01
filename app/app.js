@@ -45,8 +45,7 @@ var App=(function(){
     x.fillStyle='#5bb3a2';x.font='700 32px system-ui,sans-serif';x.fillText((pet||'Your cat').toUpperCase()+' SAYS',92,430);
     x.fillStyle='#F2E8D5';x.font='800 92px Georgia,serif';var yy=_wrap(x,rmain,90,550,910,104);
     x.fillStyle='#cdbfa8';x.font='400 36px system-ui,sans-serif';_wrap(x,rsub,90,yy+74,910,48);
-    _mark(x,90,1000,1.6);
-    x.fillStyle='#8a8070';x.font='600 27px system-ui,sans-serif';x.fillText('pawlogue.pet',330,1000);
+    x.fillStyle='#8a8070';x.font='600 30px system-ui,sans-serif';x.fillText('pawlogue.pet  ·  the honest cat translator',90,1010);
     c.toBlob(function(b){ if(!b){toast('Could not make card');return;}
       var f=new File([b],'pawlogue-'+(pet||'cat')+'.png',{type:'image/png'});
       if(navigator.canShare&&navigator.canShare({files:[f]})){ navigator.share({files:[f],title:'Pawlogue',text:(pet||'My cat')+' on Pawlogue, the honest cat translator'}).catch(function(){}); }
