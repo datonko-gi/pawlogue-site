@@ -82,9 +82,25 @@ var App=(function(){
     buildCues('talkCues');buildCues('replyCues');}
   function editPet(){pendingName=pet;$('petInput').value=pet;showWizard('species');}
 
-  function go(v){['listen','talk','dict','log'].forEach(function(x){$('view-'+x).classList.toggle('hidden',x!==v);$('nav-'+x).classList.toggle('active',x===v);});
+  function go(v){
+    if(v!=='video' && typeof PawVideo!=='undefined'){ try{PawVideo.stopCamera();}catch(_){} resetVideoPanels(); }
+    ['listen','talk','video','dict','log'].forEach(function(x){$('view-'+x).classList.toggle('hidden',x!==v);$('nav-'+x).classList.toggle('active',x===v);});
     if(v==='dict'){renderDict();renderBaseDict();} if(v==='log')renderLog();
-    if(v==='talk'){buildCues('talkCues');$('reactPrompt2').classList.add('hidden');}}
+    if(v==='talk'){buildCues('talkCues');$('reactPrompt2').classList.add('hidden');}
+    if(v==='video'){ resetVideoPanels(); }}
+  function resetVideoPanels(){ var s=$('vidStart'),l=$('vidLive'),r=$('vidResult'); if(s)s.classList.remove('hidden'); if(l)l.classList.add('hidden'); if(r)r.classList.add('hidden'); var b=$('vidRecBtn'); if(b){b.textContent='● Record';b.classList.remove('rec');} }
+  function buildVidCues(){var c=$('vidCues');if(!c||typeof PawTalk==='undefined')return;c.innerHTML='';
+    PawTalk.CUES.forEach(function(q){var b=document.createElement('button');b.className='vidcue';b.textContent=q.icon+' '+q.label;b.onclick=function(){PawVideo.playCue(q.id,pet);};c.appendChild(b);});}
+  function vidStart(){ if(typeof PawVideo==='undefined'){toast('Video not supported here');return;}
+    PawVideo.start($('vidcanvas')).then(function(){ $('vidStart').classList.add('hidden'); $('vidLive').classList.remove('hidden'); $('vidResult').classList.add('hidden'); buildVidCues(); })
+      .catch(function(){ toast('Camera and mic permission needed'); }); }
+  function vidToggleRec(){ var btn=$('vidRecBtn');
+    if(PawVideo.isRecording()){ PawVideo.stopRec().then(function(blob){ if(blob){ $('vidPlayback').src=URL.createObjectURL(blob); $('vidLive').classList.add('hidden'); $('vidResult').classList.remove('hidden'); } btn.textContent='● Record'; btn.classList.remove('rec'); }); }
+    else { PawVideo.startRec(); btn.textContent='■ Stop'; btn.classList.add('rec'); } }
+  function vidReadCat(){ PawVideo.readCat(pet); }
+  function vidShare(){ PawVideo.share().then(function(ok){ if(!ok)toast('Saved to your device'); }); }
+  function vidSave(){ PawVideo.save(); toast('Saved'); }
+  function vidRetake(){ resetVideoPanels(); $('vidStart').classList.add('hidden'); $('vidLive').classList.remove('hidden'); }
 
   // ---- recording ----
   function toggleRec(){ recording?stop():start(); }
@@ -261,6 +277,7 @@ var App=(function(){
   function drawWave(data){var bars=$('wave').children;if(!bars.length)buildWave();bars=$('wave').children;var step=Math.floor(data.length/bars.length)||1;
     for(var i=0;i<bars.length;i++){var v=data[i*step]/255;bars[i].style.height=(6+v*40)+'px';}}
 
-  return {init:init,editPet:editPet,savePet:savePet,pickSpecies:pickSpecies,toggleConsent:toggleConsent,saveConsent:saveConsent,startTrial:startTrial,go:go,toggleRec:toggleRec,startTeach:startTeach,closeSheet:closeSheet,reacted:reacted,sayParse:sayParse};
+  return {init:init,editPet:editPet,savePet:savePet,pickSpecies:pickSpecies,toggleConsent:toggleConsent,saveConsent:saveConsent,startTrial:startTrial,go:go,toggleRec:toggleRec,startTeach:startTeach,closeSheet:closeSheet,reacted:reacted,sayParse:sayParse,
+    vidStart:vidStart,vidToggleRec:vidToggleRec,vidReadCat:vidReadCat,vidShare:vidShare,vidSave:vidSave,vidRetake:vidRetake};
 })();
 document.addEventListener('DOMContentLoaded',App.init);
