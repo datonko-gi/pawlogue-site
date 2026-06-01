@@ -62,23 +62,23 @@
     cctx.restore();
   }
   function drawCaps(){
-    var now=performance.now(), y=H-150;
-    caps=caps.filter(function(c){ return now-c.born < 5200; });
+    var now=performance.now(), y=H-170;
+    caps=caps.filter(function(c){ return now-c.born < 5500; });
     var show=caps.slice(-3);
     for(var i=0;i<show.length;i++){
       var c=show[i], you=c.who==='you';
-      cctx.font='600 34px system-ui,sans-serif';
-      var pad=20, tw=Math.min(cctx.measureText(c.text).width+pad*2, W-60);
-      var bw=tw, bh=58, bx=you?(W-bw-30):30, by=y;
-      cctx.save(); cctx.globalAlpha=0.86; cctx.fillStyle=you?'rgba(20,52,46,.92)':'rgba(40,28,16,.92)';
-      roundRect(bx,by,bw,bh,16); cctx.fill();
-      cctx.globalAlpha=1; cctx.fillStyle=you?'#7fd1c0':'#f0c389'; cctx.font='700 18px system-ui,sans-serif';
-      cctx.fillText(you?'YOU':'CAT', bx+pad, by+22);
-      cctx.fillStyle='#F2E8D5'; cctx.font='600 26px system-ui,sans-serif';
+      var pad=26; cctx.font='700 42px system-ui,sans-serif';
+      var tw=Math.min(cctx.measureText(c.text).width+pad*2, W-44);
+      var bw=tw, bh=84, bx=you?(W-bw-22):22, by=y;
+      cctx.save(); cctx.globalAlpha=0.9; cctx.fillStyle=you?'rgba(20,52,46,.94)':'rgba(40,28,16,.94)';
+      roundRect(bx,by,bw,bh,20); cctx.fill();
+      cctx.globalAlpha=1; cctx.fillStyle=you?'#7fd1c0':'#f0c389'; cctx.font='800 22px system-ui,sans-serif';
+      cctx.fillText(you?'YOU':'CAT', bx+pad, by+30);
+      cctx.fillStyle='#F2E8D5'; cctx.font='700 40px system-ui,sans-serif';
       var t=c.text; while(cctx.measureText(t).width>bw-pad*2 && t.length>4){ t=t.slice(0,-2); } if(t!==c.text)t+='…';
-      cctx.fillText(t, bx+pad, by+46);
+      cctx.fillText(t, bx+pad, by+68);
       cctx.restore();
-      y-=bh+10;
+      y-=bh+12;
     }
   }
   function recDot(){
@@ -103,7 +103,9 @@
   function stopRec(){
     return new Promise(function(res){
       if(!rec||!recording){ res(null); return; }
-      rec.onstop=function(){ lastBlob=new Blob(chunks,{type:(chunks[0]&&chunks[0].type)||mime||'video/webm'}); recording=false; res(lastBlob); };
+      var dur=Math.round((performance.now()-recStart)/1000);
+      var thumb=''; try{ thumb=canvas.toDataURL('image/jpeg',0.55); }catch(_){}
+      rec.onstop=function(){ lastBlob=new Blob(chunks,{type:(chunks[0]&&chunks[0].type)||mime||'video/webm'}); recording=false; res({blob:lastBlob,thumb:thumb,dur:dur}); };
       rec.stop();
     });
   }
@@ -128,19 +130,18 @@
     if(typeof PawTalk!=='undefined'){ PawTalk.play(id, petName); var q=PawTalk.cue(id); caption('you', (q?q.label:id)); }
   }
 
-  function share(){
-    if(!lastBlob)return Promise.resolve(false);
-    var ext=(lastBlob.type.indexOf('mp4')>=0)?'mp4':'webm';
-    var file=new File([lastBlob],'pawlogue-'+Date.now()+'.'+ext,{type:lastBlob.type});
+  function share(blob){ blob=blob||lastBlob; if(!blob)return Promise.resolve(false);
+    var ext=(blob.type.indexOf('mp4')>=0)?'mp4':'webm';
+    var file=new File([blob],'pawlogue-'+Date.now()+'.'+ext,{type:blob.type});
     if(navigator.canShare && navigator.canShare({files:[file]})){
       return navigator.share({files:[file], title:'Pawlogue', text:'What my cat is really saying, via Pawlogue'}).then(function(){return true;}).catch(function(){return false;});
     }
-    save(); return Promise.resolve(false);
+    return Promise.resolve(false);
   }
-  function save(){
-    if(!lastBlob)return; var ext=(lastBlob.type.indexOf('mp4')>=0)?'mp4':'webm';
-    var a=document.createElement('a'); a.href=URL.createObjectURL(lastBlob); a.download='pawlogue-'+Date.now()+'.'+ext; a.click();
+  function save(blob){ blob=blob||lastBlob; if(!blob)return; var ext=(blob.type.indexOf('mp4')>=0)?'mp4':'webm';
+    var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='pawlogue-'+Date.now()+'.'+ext; a.click();
   }
+  function canNativeShare(){ try{ return !!(navigator.canShare && navigator.canShare({files:[new File([new Blob(['x'])],'x.webm',{type:'video/webm'})]})); }catch(_){ return false; } }
   function stopCamera(){
     if(raf)cancelAnimationFrame(raf); raf=null;
     try{ if(rec&&recording)rec.stop(); }catch(_){} recording=false;
@@ -150,6 +151,6 @@
   }
 
   global.PawVideo={ start:start, startRec:startRec, stopRec:stopRec, readCat:readCat, playCue:playCue,
-    caption:caption, share:share, save:save, stopCamera:stopCamera,
+    caption:caption, share:share, save:save, canNativeShare:canNativeShare, stopCamera:stopCamera,
     isRecording:function(){return recording;}, hasClip:function(){return !!lastBlob;}, lastBlob:function(){return lastBlob;} };
 })(window);
