@@ -198,6 +198,12 @@
   h2{font-family:var(--serif); font-weight:500; font-size:clamp(28px,4vw,46px); line-height:1.08;
     letter-spacing:-.01em; margin-top:14px; max-width:20ch}
   .lead{color:var(--cream-dim); margin-top:18px; max-width:60ch; font-size:18px}
+  .moods{display:flex; gap:14px; flex-wrap:wrap; justify-content:center; margin-top:46px}
+  .mood{flex:1; min-width:148px; max-width:210px; text-align:center; border:1px solid var(--line); border-radius:22px;
+    padding:24px 14px; background:linear-gradient(180deg,rgba(242,232,213,.05),transparent)}
+  .mood svg{width:92px; height:92px}
+  .mood .ml{font-weight:700; font-size:16px; margin-top:12px}
+  .mood .md{font-size:13px; color:var(--cream-dim); margin-top:3px}
 
   /* DIALOGUE thread */
   .dlg{display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:center; margin-top:50px}
@@ -334,9 +340,9 @@
 </div></nav>
 
 <header id="top"><div class="wrap">
-  <span class="eyebrow reveal d1"><b>●</b> Cats first · iOS &amp; Android · in build</span>
-  <h1 class="reveal d2">Have a real conversation with your <em>cat</em>.</h1>
-  <p class="sub reveal d3">Pawlogue is the first honest two-way translator for cats. It reads what your cat says, learns the meaning of <strong>your</strong> cat's own meows, and helps you answer back with sounds your cat actually responds to. A real back-and-forth. Nothing made up.</p>
+  <span class="eyebrow reveal d1"><b>●</b> Cats first · iOS &amp; Android · live beta</span>
+  <h1 class="reveal d2">Finally understand your <em>cat</em>.</h1>
+  <p class="sub reveal d3">Know how your cat feels, learn what each meow means, and answer back in a way they actually get. Pawlogue turns the guessing into a real back-and-forth, and it gets sharper about <strong>your</strong> cat every single week. This is the closeness you always wanted with them.</p>
 
   <div class="reveal d4" style="margin-top:38px;display:flex;gap:12px;flex-wrap:wrap">
     <a class="btn" href="#get" style="font-size:16px;padding:14px 26px">Get early access</a>
@@ -415,8 +421,64 @@
       </div>
     </div>
     <div>
-      <p class="lead" style="margin-top:0">When you "talk back," you are not typing a sentence we pretend to translate. You pick from cues cats demonstrably respond to: a trill, the "pspsps" sound, a slow blink prompt, the feeding call, your cat's name, your own voice. Pawlogue tracks which ones actually work on your cat, and tells you the honest hit rate.</p>
-      <p class="lead">Try to "say" something your cat has not learned yet and Pawlogue marks it <span style="color:var(--orange);font-weight:700">in orange</span>: that cue is not in your cat's dictionary yet. No faking that the cat understood.</p>
+      <p class="lead" style="margin-top:0">Then you answer. Pick a cue your cat truly responds to: a trill, the "pspsps" sound, a slow blink, the feeding call, their name, your own voice. Pawlogue learns which ones light up <em>your</em> cat and shows you the hit rate, so the two of you build a real shared language.</p>
+      <p class="lead">As you go, it highlights the cues your cat already knows <span style="color:var(--teal-soft);font-weight:700">in teal</span> and the new ones to teach <span style="color:var(--orange);font-weight:700">in orange</span>, so you always know how to reach them.</p>
+    </div>
+  </div>
+</div></section>
+
+<!-- MOODS -->
+<section id="moods"><div class="wrap">
+  <span class="tag">Reads the whole range</span>
+  <h2>Every mood, in their own voice.</h2>
+  <p class="lead">From a happy purr to a grumpy warning, Pawlogue knows the difference, and helps you respond to each one.</p>
+  <div class="moods">
+    <div class="mood">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <path d="M20 40 L27 14 L46 34 Z" fill="#E8A657"/><path d="M80 40 L73 14 L54 34 Z" fill="#E8A657"/>
+        <circle cx="50" cy="56" r="35" fill="#E8A657"/>
+        <path d="M33 54 q7 7 14 0" stroke="#1b1814" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <path d="M53 54 q7 7 14 0" stroke="#1b1814" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <path d="M46 62 L56 62 L51 69 Z" fill="#2D8B7A"/>
+        <path d="M51 69 q-6 5 -12 1 M51 69 q6 5 12 1" stroke="#1b1814" stroke-width="2.5" fill="none" stroke-linecap="round" opacity=".6"/>
+        <g stroke="#1b1814" stroke-width="2" opacity=".32" stroke-linecap="round"><path d="M31 60 L13 56"/><path d="M31 66 L14 70"/><path d="M69 60 L87 56"/><path d="M69 66 L86 70"/></g>
+      </svg>
+      <div class="ml">Content</div><div class="md">happy, relaxed purr</div>
+    </div>
+    <div class="mood">
+      <svg viewBox="0 0 100 100" aria-hidden="true"><g transform="rotate(-7 50 56)">
+        <path d="M20 40 L27 12 L46 33 Z" fill="#E8A657"/><path d="M80 40 L73 12 L54 33 Z" fill="#E8A657"/>
+        <circle cx="50" cy="56" r="35" fill="#E8A657"/>
+        <circle cx="40" cy="54" r="7.5" fill="#1b1814"/><circle cx="62" cy="54" r="7.5" fill="#1b1814"/>
+        <circle cx="42.5" cy="51" r="2.4" fill="#F2E8D5"/><circle cx="64.5" cy="51" r="2.4" fill="#F2E8D5"/>
+        <path d="M46 64 L56 64 L51 71 Z" fill="#2D8B7A"/>
+        <g stroke="#1b1814" stroke-width="2" opacity=".32" stroke-linecap="round"><path d="M31 62 L13 58"/><path d="M69 62 L87 58"/></g>
+      </g></svg>
+      <div class="ml">Curious</div><div class="md">alert, asking</div>
+    </div>
+    <div class="mood">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <path d="M20 40 L27 14 L46 34 Z" fill="#E8A657"/><path d="M80 40 L73 14 L54 34 Z" fill="#E8A657"/>
+        <circle cx="50" cy="56" r="35" fill="#E8A657"/>
+        <path d="M33 48 L47 54" stroke="#1b1814" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M67 48 L53 54" stroke="#1b1814" stroke-width="3.5" stroke-linecap="round"/>
+        <circle cx="41" cy="58" r="4.5" fill="#1b1814"/><circle cx="59" cy="58" r="4.5" fill="#1b1814"/>
+        <path d="M48 64 L52 64 L50 68 Z" fill="#2D8B7A"/>
+        <path d="M43 72 L57 72" stroke="#1b1814" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+      <div class="ml">Grumpy</div><div class="md">warning, back off</div>
+    </div>
+    <div class="mood">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <path d="M20 40 L27 14 L46 34 Z" fill="#E8A657"/><path d="M82 36 L66 8 L54 32 Z" fill="#E8A657"/>
+        <circle cx="50" cy="56" r="35" fill="#E8A657"/>
+        <circle cx="40" cy="53" r="6.5" fill="#1b1814"/><circle cx="62" cy="53" r="6.5" fill="#1b1814"/>
+        <circle cx="42" cy="50.5" r="2.1" fill="#F2E8D5"/><circle cx="64" cy="50.5" r="2.1" fill="#F2E8D5"/>
+        <path d="M39 63 Q50 77 63 63 Z" fill="#1b1814"/>
+        <path d="M47 70 Q50.5 78 54 70 Z" fill="#d98a6e"/>
+        <path d="M46 60 L56 60 L51 65 Z" fill="#2D8B7A"/>
+      </svg>
+      <div class="ml">Playful</div><div class="md">let's play</div>
     </div>
   </div>
 </div></section>
@@ -446,24 +508,23 @@
 <!-- WHY HONEST -->
 <section id="honest"><div class="wrap split">
   <div>
-    <span class="tag">Why honest</span>
-    <p class="quote">There is no universal cat language. So we refuse to fake one, in either direction.</p>
-    <p class="lead">A meow means different things from one cat to the next, and no app can "translate your words into cat." What is real: a cat's mood, the meows your own cat repeats with you, and the cues your cat has learned to answer. Pawlogue is built on exactly that, and nothing it cannot stand behind.</p>
+    <span class="tag">What you get</span>
+    <p class="quote">Get closer to your cat than you ever have.</p>
+    <p class="lead">Pawlogue reads your cat's mood, learns the meaning of their own meows, and helps you answer in a way they understand. The more you use it, the better it knows your cat, until the two of you genuinely get each other. Every read is grounded in what the science actually supports, so you can trust what you hear.</p>
     <div class="pills">
-      <span class="pill"><b>On-device</b> by default</span>
-      <span class="pill"><b>No</b> fake sentences</span>
-      <span class="pill"><b>Not</b> medical advice</span>
-      <span class="pill"><b>Your data</b> stays yours</span>
+      <span class="pill"><b>Private</b>, on your device</span>
+      <span class="pill"><b>Smarter</b> every week</span>
+      <span class="pill"><b>Cats</b> now, dogs next</span>
+      <span class="pill"><b>Free</b> in beta</span>
     </div>
   </div>
   <div class="honestcard">
-    <div class="row"><span class="yes">✓</span><span>Reads mood and the sounds that are stable across cats</span></div>
-    <div class="row"><span class="yes">✓</span><span>Learns the meanings you teach for your specific cat</span></div>
-    <div class="row"><span class="yes">✓</span><span>Lets you reply with cues your cat truly responds to</span></div>
-    <div class="row"><span class="yes">✓</span><span>Tells you when it is not sure, instead of guessing</span></div>
-    <div class="row"><span class="no">✕</span><span>Pretends your cat said a full human sentence</span></div>
-    <div class="row"><span class="no">✕</span><span>Pretends to turn your words into cat language</span></div>
-    <div class="row"><span class="no">✕</span><span>Diagnoses illness or sells your recordings</span></div>
+    <div class="row"><span class="yes">✓</span><span>Know how your cat feels right now</span></div>
+    <div class="row"><span class="yes">✓</span><span>Understand what each of their meows means</span></div>
+    <div class="row"><span class="yes">✓</span><span>Answer back with cues they truly respond to</span></div>
+    <div class="row"><span class="yes">✓</span><span>Build a shared language that grows every week</span></div>
+    <div class="row"><span class="yes">✓</span><span>Catch early when something seems off</span></div>
+    <div class="row"><span class="yes">✓</span><span>Private by default, your data stays yours</span></div>
   </div>
 </div></section>
 
