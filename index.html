@@ -279,6 +279,14 @@
   .getcard p{color:var(--cream-dim); font-size:14.5px; margin-bottom:14px}
   .getcard .btn{font-size:14px; padding:10px 18px}
   .getcard .soonpill{font-size:12px; color:var(--cream-dim); border:1px solid var(--line); border-radius:999px; padding:9px 16px; display:inline-block}
+  .stores-wrap{margin-top:34px; text-align:center}
+  .stores-soon{display:inline-block; font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--amber); font-weight:700; border:1px solid var(--line); border-radius:999px; padding:6px 16px; margin-bottom:16px}
+  .stores{display:flex; gap:14px; justify-content:center; flex-wrap:wrap}
+  .storebadge{display:flex; align-items:center; gap:11px; background:#000; border:1px solid rgba(242,232,213,.22); border-radius:13px; padding:10px 18px; opacity:.7; cursor:default}
+  .storebadge svg{width:24px; height:24px; flex-shrink:0}
+  .storebadge .st{display:flex; flex-direction:column; line-height:1.12; text-align:left}
+  .storebadge .st small{font-size:9.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--cream-dim)}
+  .storebadge .st b{font-size:16px; font-weight:700; color:#fff}
 
   /* both */
   .both{display:flex; gap:18px; flex-wrap:wrap; margin-top:30px}
@@ -502,7 +510,20 @@
       <a class="btn ghost" href="/science.html">Read the science</a>
     </div>
   </div>
-  <p class="wait-note">iOS App Store and Google Play versions are on the way. The web app and APK let the first testers in today.</p>
+  <p class="wait-note">The web app and APK let the first testers in today.</p>
+  <div class="stores-wrap">
+    <span class="stores-soon">Coming soon</span>
+    <div class="stores">
+      <span class="storebadge" aria-label="Google Play, coming soon">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.6 2.3c-.3.2-.5.6-.5 1.1v17.2c0 .5.2.9.5 1.1l9.3-9.7L3.6 2.3z" fill="#34A853"/><path d="M16.9 8.3 13 11.9l3.9 3.6 3.6-2c.8-.5.8-1.7 0-2.2l-3.6-2z" fill="#FBBC04"/><path d="M3.6 2.3 12.9 12 16.9 8.3 6.1.9C5.4.5 4.6.7 3.6 2.3z" fill="#EA4335"/><path d="M3.6 21.7 16.9 15.6 12.9 12 3.6 21.7z" fill="#4285F4"/></svg>
+        <span class="st"><small>Get it on</small><b>Google Play</b></span>
+      </span>
+      <span class="storebadge" aria-label="Apple App Store, coming soon">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M17.05 12.04c-.03-2.4 1.96-3.55 2.05-3.61-1.12-1.64-2.86-1.86-3.48-1.89-1.48-.15-2.89.87-3.64.87-.75 0-1.91-.85-3.14-.83-1.62.02-3.11.94-3.94 2.39-1.68 2.92-.43 7.24 1.21 9.61.8 1.16 1.76 2.46 3.02 2.41 1.21-.05 1.67-.78 3.13-.78 1.46 0 1.87.78 3.14.76 1.3-.02 2.12-1.18 2.91-2.35.92-1.35 1.3-2.66 1.32-2.73-.03-.01-2.53-.97-2.56-3.84zM14.69 5.2c.66-.8 1.11-1.92.99-3.03-.95.04-2.11.63-2.8 1.43-.61.71-1.15 1.85-1.01 2.94 1.07.08 2.16-.54 2.82-1.34z"/></svg>
+        <span class="st"><small>Download on the</small><b>App Store</b></span>
+      </span>
+    </div>
+  </div>
 </div></section>
 
 <!-- BOTH -->
