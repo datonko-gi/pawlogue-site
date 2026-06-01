@@ -290,6 +290,9 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
     <div class="h2">Talk to <span id="talkName">your cat</span></div>
     <div class="sub">Tap a sound or word to play it, then tell Pawlogue if your cat reacted. Every press is a little different, like a real voice.</div>
     <div class="cues" id="talkCues"></div>
+    <div class="seclabel" id="ownVoiceLabel" style="display:none">In <span class="ownNm">your cat</span>'s own voice</div>
+    <div class="sub" id="ownVoiceSub" style="display:none;margin-bottom:8px">Real recordings of <span class="ownNm">your cat</span>, played back as they are. Save more from Listen and you get more of their real sounds here.</div>
+    <div class="cues" id="ownVoiceCues"></div>
     <div class="react hidden" id="reactPrompt2">
       <div class="rq">Did <span class="rnm">your cat</span> react to that?</div>
       <div class="rb"><button class="yes" onclick="App.reacted(1)">Yes, reacted</button><button class="no" onclick="App.reacted(0)">No response</button></div>
@@ -342,6 +345,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   <div class="racts">
     <button onclick="App.closeSheet()">Done</button>
     <button onclick="App.shareCard()">Share</button>
+    <button id="voiceBtn" onclick="App.saveVoice()">+ Voice</button>
     <button class="primary" id="teachBtn" onclick="App.startTeach()">Teach</button>
   </div>
   <div class="note" id="rnote"></div>

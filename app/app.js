@@ -137,7 +137,7 @@ var App=(function(){
     if(v!=='video' && typeof PawVideo!=='undefined'){ try{PawVideo.stopCamera();}catch(_){} resetVideoPanels(); }
     ['listen','talk','video','dict','log'].forEach(function(x){$('view-'+x).classList.toggle('hidden',x!==v);$('nav-'+x).classList.toggle('active',x===v);});
     if(v==='dict'){renderDict();renderBaseDict();} if(v==='log')renderLog();
-    if(v==='talk'){buildCues('talkCues');$('reactPrompt2').classList.add('hidden');renderTips(true);}
+    if(v==='talk'){buildCues('talkCues');renderOwnVoice();$('reactPrompt2').classList.add('hidden');renderTips(true);}
     if(v==='video'){ resetVideoPanels(); renderClips(); }}
   function resetVideoPanels(){ vidCameraOn=false; var s=$('vidStart'),l=$('vidLive'),r=$('vidResult'); if(s)s.classList.remove('hidden'); if(l)l.classList.add('hidden'); if(r)r.classList.add('hidden'); var b=$('vidRecBtn'); if(b){b.textContent='● Record';b.classList.remove('rec');} }
   var vidCurrentBlob=null, vidCameraOn=false;
@@ -256,6 +256,7 @@ var App=(function(){
     showTier2(r);
     $('labelArea').classList.add('hidden');
     $('rnote').textContent='Real on-device model read, not a guess. This is mood and sound, not words. New or persistent odd sounds: see a vet. Not veterinary advice.';
+    if(last)last.detLabel=top.label;
     logResult({soundType:top.label,affect:eng.affect,emoji:emoji,confidence:eng.confidence});
     openSheet();
   }
@@ -269,6 +270,7 @@ var App=(function(){
     showTier2(r);
     $('labelArea').classList.add('hidden');
     $('rnote').textContent='Affect, not words. If a sound is new or you hear it a lot and seems off, a vet check is worth it. Pawlogue is not veterinary advice.';
+    if(last)last.detLabel=c.soundType;
     logResult(c);
     openSheet();
   }
@@ -281,10 +283,46 @@ var App=(function(){
   function buildChips(){var c=$('chips');if(!c)return;c.innerHTML='';LABELS.forEach(function(l){var b=document.createElement('div');b.className='chip';b.textContent=l;b.onclick=function(){teach(l);};c.appendChild(b);});}
   function teach(label){
     if(!last||!last.vector){toast('No clip to save');return;}
-    addProto({label:label,vector:last.vector,blob:last.blob,ts:Date.now()}).then(function(){
+    addProto({label:label,vector:last.vector,blob:last.blob,ts:Date.now(),src:'teach'}).then(function(){
       toast((pet||'Your pet')+"'s dictionary grew 🎉");
-      $('labelArea').classList.add('hidden'); closeSheet(); renderDict();
+      $('labelArea').classList.add('hidden'); closeSheet(); renderDict(); renderOwnVoice();
     });
+  }
+  // one-tap: keep this real recording in the cat's own-voice bank (auto-named by the model)
+  function saveVoice(){
+    if(!last||!last.vector||!last.blob){toast('Listen to '+(pet||'your cat')+' first');return;}
+    addProto({label:(last.detLabel||'Sound'),vector:last.vector,blob:last.blob,ts:Date.now(),src:'voice'}).then(function(){
+      toast('Saved to '+(pet||'your cat')+"'s own voice 🎙");
+      renderOwnVoice(); renderDict();
+    });
+  }
+  // ---- talk back in the cat's OWN voice (real recordings, replayed honestly) ----
+  var ownIdx={};
+  function renderOwnVoice(){
+    var box=$('ownVoiceCues'); if(!box)return;
+    allProto().then(function(ps){
+      var lab=$('ownVoiceLabel'), sub=$('ownVoiceSub'); box.innerHTML='';
+      var withAudio=ps.filter(function(p){return p&&p.blob;});
+      if(!withAudio.length){ if(lab)lab.style.display='none'; if(sub)sub.style.display='none'; return; }
+      if(lab)lab.style.display=''; if(sub)sub.style.display='';
+      [].forEach.call(document.querySelectorAll('.ownNm'),function(e){e.textContent=pet||'your cat';});
+      var byL={}; withAudio.forEach(function(p){(byL[p.label]=byL[p.label]||[]).push(p);});
+      Object.keys(byL).forEach(function(k){var items=byL[k];
+        var el=document.createElement('button'); el.className='cue';
+        el.innerHTML='<div class="cl">🐱 '+k+' <span style="font-weight:600;color:var(--amber)">· their voice</span></div>'+
+          '<div class="cb">'+items.length+' real recording'+(items.length>1?'s':'')+' of '+(pet||'your cat')+', replayed as-is.</div>'+
+          '<div class="hit none">tap to play '+(items.length>1?'(cycles through them)':'')+'</div>';
+        el.onclick=function(){playOwn(k,items,el);};
+        box.appendChild(el);});
+    });
+  }
+  function playOwn(label,items,el){
+    var i=(ownIdx[label]||0); ownIdx[label]=i+1; var it=items[i%items.length];
+    playBlob(it.blob);
+    if(el){el.classList.add('lit');setTimeout(function(){el.classList.remove('lit');},700);}
+    toast('Played '+(pet||'your cat')+"'s own voice (clip "+((i%items.length)+1)+' of '+items.length+')');
+    lastCue='own:'+label;
+    var rp=$('reactPrompt2'); if(rp){rp.classList.remove('hidden'); var rq=rp.querySelector('.rq'); if(rq)rq.textContent='Did '+(pet||'your cat')+' react to their own voice?';}
   }
   function countLabel(ps,l){var n=0;ps.forEach(function(p){if(p.label===l)n++;});return n;}
   function renderDict(){
@@ -376,7 +414,7 @@ var App=(function(){
   function drawWave(data){var bars=$('wave').children;if(!bars.length)buildWave();bars=$('wave').children;var step=Math.floor(data.length/bars.length)||1;
     for(var i=0;i<bars.length;i++){var v=data[i*step]/255;bars[i].style.height=(6+v*40)+'px';}}
 
-  return {init:init,editPet:editPet,savePet:savePet,pickSpecies:pickSpecies,toggleConsent:toggleConsent,saveConsent:saveConsent,startTrial:startTrial,demoListen:demoListen,shareCard:shareCard,openSettings:openSettings,closeSettings:closeSettings,toggleConsent2:toggleConsent2,deleteAllData:deleteAllData,go:go,toggleRec:toggleRec,startTeach:startTeach,closeSheet:closeSheet,reacted:reacted,sayParse:sayParse,
+  return {init:init,editPet:editPet,savePet:savePet,pickSpecies:pickSpecies,toggleConsent:toggleConsent,saveConsent:saveConsent,startTrial:startTrial,demoListen:demoListen,shareCard:shareCard,openSettings:openSettings,closeSettings:closeSettings,toggleConsent2:toggleConsent2,deleteAllData:deleteAllData,go:go,toggleRec:toggleRec,startTeach:startTeach,closeSheet:closeSheet,reacted:reacted,sayParse:sayParse,saveVoice:saveVoice,
     vidStart:vidStart,vidToggleRec:vidToggleRec,vidReadCat:vidReadCat,vidToggleCues:vidToggleCues,vidSave:vidSave,vidNewClip:vidNewClip};
 })();
 document.addEventListener('DOMContentLoaded',App.init);
