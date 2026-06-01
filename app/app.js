@@ -5,6 +5,7 @@ var App=(function(){
   var species=localStorage.getItem('paw_species')||'cat';
   var pendingName='';
   var consent=(function(){try{return JSON.parse(localStorage.getItem('paw_consent')||'{}');}catch(_){return {};}})();
+  var cuePlays=[];
   var recording=false, last=null, db=null;
   var engineReady=false, DICT_CLASSES=[];
   var DICT_EMOJI={Content:'😌',Angry:'😾',Defense:'🙀',Fighting:'😼',Warning:'😼',Mating:'🌙',MotherCall:'🐈',Hunting:'🪶'};
@@ -105,6 +106,13 @@ var App=(function(){
     if(k==='learn'){consent.learn=!consent.learn; if(!consent.learn)consent.clips=false;}
     else {consent.clips=!consent.clips; if(consent.clips)consent.learn=true;}
     renderConsentUI();}
+  function openSettings(){ setText('setPetName', pet||'your cat'); var l=$('sctog-learn'),c=$('sctog-clips'); if(l)l.classList.toggle('on',!!consent.learn); if(c)c.classList.toggle('on',!!consent.clips); $('settingsModal').classList.remove('hidden'); }
+  function closeSettings(){ $('settingsModal').classList.add('hidden'); }
+  function toggleConsent2(k){ if(k==='learn'){consent.learn=!consent.learn; if(!consent.learn)consent.clips=false;} else {consent.clips=!consent.clips; if(consent.clips)consent.learn=true;}
+    consent.ts=Date.now(); localStorage.setItem('paw_consent',JSON.stringify(consent));
+    var l=$('sctog-learn'),c=$('sctog-clips'); if(l)l.classList.toggle('on',!!consent.learn); if(c)c.classList.toggle('on',!!consent.clips); renderConsentUI(); }
+  function deleteAllData(){ if(!confirm('Delete everything Pawlogue stored on this device? Your pet, taught sounds, clips and settings will be erased.'))return;
+    try{localStorage.clear();}catch(_){} try{indexedDB.deleteDatabase('pawlogue');}catch(_){} setTimeout(function(){location.reload();},150); }
   function saveConsent(){consent.ts=Date.now(); localStorage.setItem('paw_consent',JSON.stringify(consent));
     var n=pendingName||pet||'Milo'; setPet(n); localStorage.setItem('paw_onboarded','1'); $('petModal').classList.add('hidden'); toast('Welcome, '+n+' 🐾'); go('listen');}
   function pickSpecies(s){species=s;localStorage.setItem('paw_species',s);
@@ -311,6 +319,8 @@ var App=(function(){
       el.onclick=function(){playCue(q.id,el);};
       c.appendChild(el);});}
   function playCue(id,el){var q=PawTalk.cue(id);if(!q)return;
+    var now=Date.now(); cuePlays.push(now); cuePlays=cuePlays.filter(function(t){return now-t<60000;});
+    if(cuePlays.length>8){ toast('Give '+(pet||'your cat')+' a break. Too many sounds in a row can stress a cat.'); }
     PawTalk.play(id,pet); lastCue=id;
     if(el){el.classList.add('lit');setTimeout(function(){el.classList.remove('lit');},700);}
     if(id==='blink')toast('Look at '+(pet||'your cat')+', slowly close your eyes ~1s, then open');
@@ -354,7 +364,7 @@ var App=(function(){
   function drawWave(data){var bars=$('wave').children;if(!bars.length)buildWave();bars=$('wave').children;var step=Math.floor(data.length/bars.length)||1;
     for(var i=0;i<bars.length;i++){var v=data[i*step]/255;bars[i].style.height=(6+v*40)+'px';}}
 
-  return {init:init,editPet:editPet,savePet:savePet,pickSpecies:pickSpecies,toggleConsent:toggleConsent,saveConsent:saveConsent,startTrial:startTrial,demoListen:demoListen,shareCard:shareCard,go:go,toggleRec:toggleRec,startTeach:startTeach,closeSheet:closeSheet,reacted:reacted,sayParse:sayParse,
+  return {init:init,editPet:editPet,savePet:savePet,pickSpecies:pickSpecies,toggleConsent:toggleConsent,saveConsent:saveConsent,startTrial:startTrial,demoListen:demoListen,shareCard:shareCard,openSettings:openSettings,closeSettings:closeSettings,toggleConsent2:toggleConsent2,deleteAllData:deleteAllData,go:go,toggleRec:toggleRec,startTeach:startTeach,closeSheet:closeSheet,reacted:reacted,sayParse:sayParse,
     vidStart:vidStart,vidToggleRec:vidToggleRec,vidReadCat:vidReadCat,vidToggleCues:vidToggleCues,vidSave:vidSave,vidNewClip:vidNewClip};
 })();
 document.addEventListener('DOMContentLoaded',App.init);

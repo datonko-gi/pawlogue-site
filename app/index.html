@@ -150,6 +150,13 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 .ctog .ctxt{display:flex;flex-direction:column;gap:3px}
 .ctog .ctxt b{font-size:14.5px;font-weight:700}
 .ctog .ctxt small{font-size:12.5px;color:var(--mut);line-height:1.45}
+.gear{background:var(--ink2);border:1px solid var(--line);color:var(--dim);font-size:16px;width:36px;height:36px;border-radius:50%;cursor:pointer;line-height:1}
+.gear:active{border-color:var(--amber)}
+.setlabel{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);font-weight:700;margin:16px 0 8px}
+.setrow{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+.setrow a,.setrow .lnk{color:var(--amber);background:none;border:none;font-family:inherit;font-size:14.5px;cursor:pointer;text-decoration:none}
+.dangerbtn{width:100%;background:none;border:1px solid rgba(217,138,110,.4);color:var(--alert);font-family:inherit;font-weight:600;font-size:14px;padding:12px;border-radius:12px;cursor:pointer;margin-top:10px}
+.g9plus{font-size:12px;color:var(--mut);margin-top:12px;text-align:center;line-height:1.4}
 
 /* reply palette (in result sheet) + Talk view */
 .replyhead{font-size:12.5px;color:var(--mut);margin:18px 0 10px;line-height:1.5}
@@ -219,7 +226,10 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 <div id="app">
   <div class="topbar">
     <div class="logo" style="cursor:pointer" onclick="App.go('listen')"><span class="mk"><i></i><i></i><i></i><i></i></span>Pawlogue</div>
-    <div class="petchip" id="petchip" onclick="App.editPet()"><span id="petEmoji"></span><span id="petName">My pet</span> <span style="color:var(--mut)">▾</span></div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="petchip" id="petchip" onclick="App.editPet()"><span id="petEmoji"></span><span id="petName">My pet</span> <span style="color:var(--mut)">▾</span></div>
+      <button class="gear" onclick="App.openSettings()" aria-label="Settings">⚙</button>
+    </div>
   </div>
 
   <!-- LISTEN -->
@@ -357,6 +367,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
         <button class="spbtn" onclick="App.pickSpecies('cat')"><span class="spi">🐱</span>Cat</button>
         <button class="spbtn" onclick="App.pickSpecies('dog')"><span class="spi">🐶</span>Dog</button>
       </div>
+      <p class="g9plus">By starting you confirm you are 13 or older. Your data stays on your device.</p>
     </div>
     <!-- step 2: name -->
     <div id="step-name" class="hidden">
@@ -394,6 +405,22 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
       <p class="trialnote">Cancel anytime, in two taps. Your data stays on your device. In the App Store and Google Play version your card is added here, and you are not charged today.</p>
       <button class="btn" onclick="App.startTrial()">Start 7-day free trial</button>
     </div>
+  </div>
+</div>
+
+<div class="modal hidden" id="settingsModal">
+  <div class="box">
+    <h3>Settings</h3>
+    <div class="setrow"><span>Pet</span><button class="lnk" onclick="App.closeSettings();App.editPet()"><span id="setPetName">your cat</span>, change &rsaquo;</button></div>
+    <div class="setlabel">Help improve Pawlogue</div>
+    <div class="consent">
+      <button class="ctog" id="sctog-learn" onclick="App.toggleConsent2('learn')"><span class="cbox"></span><span class="ctxt"><b>Share anonymized learning data</b><small>Sound fingerprints plus your labels. Never raw audio, never sold.</small></span></button>
+      <button class="ctog" id="sctog-clips" onclick="App.toggleConsent2('clips')"><span class="cbox"></span><span class="ctxt"><b>Also share short clips</b><small>Optional. Helps the model the most.</small></span></button>
+    </div>
+    <div class="setrow"><a href="/privacy.html" target="_blank">Privacy policy &rsaquo;</a><span style="color:var(--mut);font-size:12.5px">on-device by default</span></div>
+    <button class="btn" style="width:100%;margin-top:14px" onclick="App.closeSettings()">Done</button>
+    <button class="dangerbtn" onclick="App.deleteAllData()">Delete all my data</button>
+    <p class="g9plus">Pawlogue beta. For ages 13 and up.</p>
   </div>
 </div>
 
