@@ -411,8 +411,10 @@ var App=(function(){
 
   // ---- sheet + wave ----
   function openSheet(){
-    var dem=!!(last&&last.isDemo);
-    var tb=$('teachBtn'), vb=$('voiceBtn'); if(tb)tb.style.display=dem?'none':''; if(vb)vb.style.display=dem?'none':'';
+    // Teach / Save-voice only make sense when there is a real recorded clip of THIS cat (a vector).
+    // Demos and "not sure" reads have no vector, so hide those actions instead of letting them fail.
+    var teachable=!!(last&&last.vector&&!last.isDemo);
+    var tb=$('teachBtn'), vb=$('voiceBtn'); if(tb)tb.style.display=teachable?'':'none'; if(vb)vb.style.display=teachable?'':'none';
     var an=$('answerName'); if(an)an.textContent=pet||'your cat';
     lastCue=null; $('labelArea').classList.add('hidden');
     var bd=$('sheetBackdrop'); if(bd)bd.classList.add('up');
