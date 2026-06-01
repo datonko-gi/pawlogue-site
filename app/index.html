@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+<title>Pawlogue</title>
+<meta name="description" content="Honest pet vocalization reader. Reads your cat or dog's mood and the dictionary you teach. On-device." />
+<meta name="theme-color" content="#12100E" />
+<link rel="manifest" href="manifest.json" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Pawlogue" />
+<link rel="apple-touch-icon" href="icon-180.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --ink:#12100E;--ink2:#1b1814;--ink3:#241f1a;--cream:#F2E8D5;--dim:#cdbfa8;--mut:#8a8070;
+  --amber:#E8A657;--amber2:#f0c389;--teal:#2D8B7A;--teal2:#5bb3a2;
+  --calm:#6BA3BE;--alert:#D4722A;--play:#8B6AAE;
+  --line:rgba(242,232,213,.12);--sans:"Plus Jakarta Sans",system-ui,sans-serif;--serif:"Fraunces",Georgia,serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:var(--ink);color:var(--cream);font-family:var(--sans);overflow:hidden;
+  -webkit-font-smoothing:antialiased;user-select:none}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(60vw 40vh at 80% -10%,rgba(232,166,87,.14),transparent 60%),
+             radial-gradient(60vw 40vh at 10% 8%,rgba(45,139,122,.10),transparent 60%)}
+#app{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;
+  max-width:560px;margin:0 auto;padding-top:env(safe-area-inset-top)}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 6px}
+.logo{display:flex;align-items:center;gap:9px;font-weight:800;letter-spacing:-.02em;font-size:18px}
+.logo .mk{display:flex;align-items:flex-end;gap:2.5px;height:18px}
+.logo .mk i{width:3px;border-radius:3px;background:var(--amber);display:block}
+.logo .mk i:nth-child(1){height:7px}.logo .mk i:nth-child(2){height:16px;background:var(--amber2)}
+.logo .mk i:nth-child(3){height:11px;background:var(--teal)}.logo .mk i:nth-child(4){height:14px}
+.petchip{display:flex;align-items:center;gap:8px;background:var(--ink2);border:1px solid var(--line);
+  border-radius:999px;padding:6px 12px;font-size:14px;font-weight:600;cursor:pointer}
+.view{flex:1;overflow-y:auto;padding:8px 20px 100px;-webkit-overflow-scrolling:touch}
+.hidden{display:none!important}
+
+/* LISTEN */
+.center{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:64vh;text-align:center}
+.moodline{font-family:var(--serif);font-size:19px;color:var(--dim);margin-bottom:30px;min-height:26px}
+.recwrap{position:relative;width:230px;height:230px;display:flex;align-items:center;justify-content:center}
+.ring{position:absolute;inset:0;border-radius:50%;border:1px solid var(--line)}
+.ring.pulse{animation:pulse 1.8s ease-out infinite}
+@keyframes pulse{0%{transform:scale(.92);opacity:.7}100%{transform:scale(1.25);opacity:0}}
+.recbtn{width:150px;height:150px;border-radius:50%;border:none;cursor:pointer;color:#1a1206;
+  font-family:var(--sans);font-weight:700;font-size:16px;background:radial-gradient(circle at 38% 32%,var(--amber2),var(--amber));
+  box-shadow:0 14px 44px rgba(232,166,87,.35);transition:transform .15s ease}
+.recbtn:active{transform:scale(.96)}
+.recbtn.live{background:radial-gradient(circle at 38% 32%,#e98b6e,var(--alert));box-shadow:0 14px 44px rgba(212,114,42,.4)}
+.hint{margin-top:26px;color:var(--mut);font-size:14px;max-width:30ch}
+.wave{display:flex;align-items:center;gap:3px;height:46px;margin-top:8px}
+.wave i{width:3px;border-radius:3px;background:var(--amber);height:6px;transition:height .08s linear}
+
+/* RESULT card */
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:30;max-width:560px;margin:0 auto;
+  background:var(--ink2);border:1px solid var(--line);border-bottom:none;border-radius:24px 24px 0 0;
+  padding:22px 22px calc(26px + env(safe-area-inset-bottom));transform:translateY(110%);
+  transition:transform .42s cubic-bezier(.2,.8,.2,1);box-shadow:0 -20px 60px rgba(0,0,0,.5)}
+.sheet.up{transform:translateY(0)}
+.grip{width:40px;height:4px;border-radius:4px;background:var(--line);margin:0 auto 16px}
+.rtype{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+.rmain{font-family:var(--serif);font-size:30px;margin:6px 0 2px;letter-spacing:-.01em}
+.rsub{color:var(--dim);font-size:15px}
+.conf{display:flex;align-items:center;gap:10px;margin:16px 0 4px}
+.bars{display:flex;gap:4px}.bars b{width:22px;height:8px;border-radius:3px;background:var(--line)}
+.bars b.on{background:var(--amber)}
+.conftxt{font-size:13px;color:var(--mut)}
+.tier2{margin-top:16px;padding:15px;border-radius:14px;background:rgba(45,139,122,.10);border:1px solid rgba(91,179,162,.25)}
+.tier2 .tg{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal2);font-weight:700}
+.tier2 .q{font-family:var(--serif);font-style:italic;font-size:18px;margin-top:6px}
+.tier2 .src{font-size:12px;color:var(--mut);margin-top:6px}
+.racts{display:flex;gap:10px;margin-top:18px}
+.racts button{flex:1;border:1px solid var(--line);background:transparent;color:var(--cream);
+  font-family:inherit;font-weight:600;font-size:14px;padding:13px;border-radius:13px;cursor:pointer}
+.racts button.primary{background:var(--amber);color:#1a1206;border-color:var(--amber)}
+.note{font-size:12.5px;color:var(--mut);margin-top:14px;line-height:1.5}
+
+/* label chips */
+.chips{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}
+.chip{border:1px solid var(--line);background:var(--ink3);color:var(--cream);border-radius:999px;
+  padding:10px 15px;font-size:14px;font-weight:600;cursor:pointer}
+.chip:active{border-color:var(--amber)}
+
+/* DICTIONARY */
+.h2{font-family:var(--serif);font-size:26px;margin:14px 0 4px}
+.sub{color:var(--dim);font-size:14.5px;margin-bottom:18px}
+.dcard{background:var(--ink2);border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.dcard .dl{font-weight:700;font-size:16px;display:flex;align-items:center;gap:9px}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--teal2)}
+.dcard .dm{font-size:13px;color:var(--mut);margin-top:3px}
+.dcard .play{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--ink3);color:var(--amber);font-size:14px;cursor:pointer}
+.empty{text-align:center;color:var(--mut);padding:40px 10px;font-size:15px}
+
+/* nav */
+.nav{position:fixed;bottom:0;left:0;right:0;z-index:20;max-width:560px;margin:0 auto;
+  display:flex;background:rgba(18,16,14,.86);backdrop-filter:blur(14px);border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom)}
+.nav button{flex:1;background:none;border:none;color:var(--mut);font-family:inherit;font-size:11px;
+  padding:11px 0 13px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px}
+.nav button.active{color:var(--amber)}
+.nav .ic{font-size:20px;line-height:1}
+
+/* modal */
+.modal{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;padding:24px}
+.modal .box{background:var(--ink2);border:1px solid var(--line);border-radius:20px;padding:26px;max-width:360px;width:100%}
+.modal h3{font-family:var(--serif);font-size:24px;margin-bottom:8px}
+.modal p{color:var(--dim);font-size:14.5px;margin-bottom:16px}
+.modal input{width:100%;background:var(--ink3);border:1px solid var(--line);color:var(--cream);
+  padding:14px;border-radius:12px;font-size:16px;font-family:inherit;margin-bottom:14px}
+.modal input:focus{outline:none;border-color:var(--amber)}
+.btn{width:100%;background:var(--amber);color:#1a1206;border:none;font-family:inherit;font-weight:700;
+  font-size:16px;padding:14px;border-radius:12px;cursor:pointer}
+.toast{position:fixed;bottom:84px;left:50%;transform:translateX(-50%);z-index:60;background:var(--ink3);
+  border:1px solid var(--line);border-radius:999px;padding:11px 20px;font-size:14px;font-weight:600;
+  opacity:0;transition:opacity .3s;pointer-events:none;max-width:90%}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="topbar">
+    <div class="logo"><span class="mk"><i></i><i></i><i></i><i></i></span>Pawlogue</div>
+    <div class="petchip" id="petchip" onclick="App.editPet()"><span id="petName">My pet</span> <span style="color:var(--mut)">▾</span></div>
+  </div>
+
+  <!-- LISTEN -->
+  <div class="view" id="view-listen">
+    <div class="center">
+      <div class="moodline" id="moodline">Tap to hear what your pet is saying</div>
+      <div class="recwrap">
+        <div class="ring" id="ring"></div>
+        <button class="recbtn" id="recbtn" onclick="App.toggleRec()">Listen</button>
+      </div>
+      <div class="wave" id="wave" aria-hidden="true"></div>
+      <div class="hint" id="hint">On-device and honest. We read mood, never fake words.</div>
+    </div>
+  </div>
+
+  <!-- DICTIONARY -->
+  <div class="view hidden" id="view-dict">
+    <div class="h2" id="dictTitle">Your pet's vocabulary</div>
+    <div class="sub" id="dictSub">The sounds you have taught. The more you teach, the sharper it reads.</div>
+    <div id="dictList"></div>
+  </div>
+
+  <!-- TIMELINE (light) -->
+  <div class="view hidden" id="view-log">
+    <div class="h2">Recent</div>
+    <div class="sub">Your last listens. Stored only on this device.</div>
+    <div id="logList"></div>
+  </div>
+</div>
+
+<!-- RESULT SHEET -->
+<div class="sheet" id="sheet">
+  <div class="grip"></div>
+  <div class="rtype" id="rtype">SOUND</div>
+  <div class="rmain" id="rmain">...</div>
+  <div class="rsub" id="rsub"></div>
+  <div class="conf"><div class="bars" id="bars"></div><div class="conftxt" id="conftxt"></div></div>
+  <div class="tier2 hidden" id="tier2">
+    <div class="tg">✦ <span id="petName2">your pet</span> specifically</div>
+    <div class="q" id="t2q"></div>
+    <div class="src" id="t2src"></div>
+  </div>
+  <div id="labelArea" class="hidden">
+    <div class="note" style="margin-top:16px">What did they want? Teach Pawlogue this sound:</div>
+    <div class="chips" id="chips"></div>
+  </div>
+  <div class="racts">
+    <button onclick="App.closeSheet()">Done</button>
+    <button class="primary" id="teachBtn" onclick="App.startTeach()">Teach this</button>
+  </div>
+  <div class="note" id="rnote"></div>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <button class="active" id="nav-listen" onclick="App.go('listen')"><span class="ic">🎧</span>Listen</button>
+  <button id="nav-dict" onclick="App.go('dict')"><span class="ic">📖</span>Dictionary</button>
+  <button id="nav-log" onclick="App.go('log')"><span class="ic">🕊</span>Recent</button>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="modal hidden" id="petModal">
+  <div class="box">
+    <h3>Who's your pet?</h3>
+    <p>Pawlogue builds a personal vocabulary for your cat or dog. No two pets sound alike.</p>
+    <input id="petInput" placeholder="Name (e.g. Milo)" maxlength="24" />
+    <button class="btn" onclick="App.savePet()">Start</button>
+  </div>
+</div>
+
+<script src="audio.js"></script>
+<script src="app.js"></script>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}</script>
+</body>
+</html>
