@@ -1,6 +1,6 @@
 /* Pawlogue service worker: offline app shell. Bump CACHE to invalidate. */
-var CACHE='pawlogue-v1';
-var ASSETS=['./','index.html','app.js','audio.js','manifest.json','icon-192.png','icon-512.png'];
+var CACHE='pawlogue-v2';
+var ASSETS=['./','index.html','app.js','audio.js','talk.js','manifest.json','icon-192.png','icon-512.png'];
 self.addEventListener('install',function(e){
   self.skipWaiting();
   e.waitUntil(caches.open(CACHE).then(function(c){return c.addAll(ASSETS).catch(function(){});}));

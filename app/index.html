@@ -7,6 +7,7 @@
 <meta name="description" content="Honest pet vocalization reader. Reads your cat or dog's mood and the dictionary you teach. On-device." />
 <meta name="theme-color" content="#12100E" />
 <link rel="manifest" href="manifest.json" />
+<meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="Pawlogue" />
@@ -121,6 +122,45 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   border:1px solid var(--line);border-radius:999px;padding:11px 20px;font-size:14px;font-weight:600;
   opacity:0;transition:opacity .3s;pointer-events:none;max-width:90%}
 .toast.show{opacity:1}
+
+/* reply palette (in result sheet) + Talk view */
+.replyhead{font-size:12.5px;color:var(--mut);margin:18px 0 10px;line-height:1.5}
+.cues{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.cue{border:1px solid var(--line);background:var(--ink3);color:var(--cream);border-radius:14px;
+  padding:12px 13px;text-align:left;cursor:pointer;font-family:inherit;transition:border-color .15s,transform .1s}
+.cue:active{transform:scale(.97)}
+.cue.lit{border-color:var(--teal2);box-shadow:0 0 0 1px rgba(91,179,162,.4)}
+.cue .cl{font-weight:700;font-size:14.5px;display:flex;align-items:center;gap:7px}
+.cue .cb{font-size:11.5px;color:var(--mut);margin-top:5px;line-height:1.4}
+.cue .hit{font-size:11px;color:var(--teal2);font-weight:700;margin-top:6px}
+.cue .hit.none{color:var(--mut);font-weight:600}
+
+/* did-react prompt */
+.react{margin-top:12px;padding:13px;border-radius:13px;background:rgba(45,139,122,.10);border:1px solid rgba(91,179,162,.25)}
+.react .rq{font-size:13.5px;color:var(--dim);margin-bottom:9px}
+.react .rb{display:flex;gap:9px}
+.react .rb button{flex:1;border:1px solid var(--line);background:transparent;color:var(--cream);font-family:inherit;font-weight:700;font-size:13.5px;padding:10px;border-radius:11px;cursor:pointer}
+.react .rb button.yes{border-color:var(--teal2);color:var(--teal2)}
+.react .rb button.no{border-color:var(--mut);color:var(--mut)}
+
+/* say-it-your-way */
+.sayrow{display:flex;gap:8px;margin:6px 0 4px}
+.sayrow input{flex:1;background:var(--ink3);border:1px solid var(--line);color:var(--cream);padding:13px 15px;border-radius:13px;font-size:15px;font-family:inherit}
+.sayrow input:focus{outline:none;border-color:var(--amber)}
+.sayrow button{border:none;background:var(--amber);color:#1a1206;font-weight:700;font-family:inherit;font-size:14px;padding:0 17px;border-radius:13px;cursor:pointer}
+.tokens{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px;min-height:6px}
+.tok{border-radius:999px;padding:7px 13px;font-size:13.5px;font-weight:600;border:1px solid var(--line)}
+.tok.known{color:var(--teal2);border-color:rgba(91,179,162,.5);background:rgba(45,139,122,.10)}
+.tok.taught{color:var(--amber2);border-color:rgba(232,166,87,.4);background:rgba(232,166,87,.08)}
+.tok.unknown{color:var(--alert);border-color:rgba(212,114,42,.55);background:rgba(212,114,42,.10)}
+.saynote{font-size:12.5px;color:var(--mut);margin-top:11px;line-height:1.5}
+
+/* base dictionary band */
+.bdcard{background:linear-gradient(180deg,rgba(232,166,87,.06),transparent);border:1px solid var(--line);border-radius:14px;padding:13px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.bdcard .dl{font-weight:700;font-size:15px;display:flex;align-items:center;gap:9px}
+.dot.base{background:var(--amber)}
+.bdcard .dm{font-size:12.5px;color:var(--mut);margin-top:3px}
+.seclabel{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);font-weight:700;margin:16px 0 10px}
 </style>
 </head>
 <body>
@@ -146,8 +186,30 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   <!-- DICTIONARY -->
   <div class="view hidden" id="view-dict">
     <div class="h2" id="dictTitle">Your pet's vocabulary</div>
-    <div class="sub" id="dictSub">The sounds you have taught. The more you teach, the sharper it reads.</div>
+    <div class="sub" id="dictSub">The base sounds work from day one. The meows you teach are unique to your cat.</div>
+    <div class="seclabel">Base dictionary · reliable across all cats</div>
+    <div id="baseDict"></div>
+    <div class="seclabel">Taught · <span id="taughtName">your cat</span> only</div>
     <div id="dictList"></div>
+  </div>
+
+  <!-- TALK (human -> cat, honest cues) -->
+  <div class="view hidden" id="view-talk">
+    <div class="h2">Talk to <span id="talkName">your cat</span></div>
+    <div class="sub">Play a cue your cat responds to, then tell Pawlogue if they reacted. It learns what works on your cat.</div>
+    <div class="cues" id="talkCues"></div>
+    <div class="react hidden" id="reactPrompt2">
+      <div class="rq">Did <span class="rnm">your cat</span> react to that?</div>
+      <div class="rb"><button class="yes" onclick="App.reacted(1)">Yes, reacted</button><button class="no" onclick="App.reacted(0)">No response</button></div>
+    </div>
+    <div class="seclabel">Say it your way</div>
+    <div class="sub" style="margin-bottom:8px">Type anything. Pawlogue keeps only the parts your cat can really respond to. <span style="color:var(--alert);font-weight:700">Orange</span> means your cat has not learned that one yet.</div>
+    <div class="sayrow">
+      <input id="sayInput" placeholder="e.g. come here, dinner time" maxlength="60" />
+      <button onclick="App.sayParse()">Check</button>
+    </div>
+    <div class="tokens" id="sayTokens"></div>
+    <div class="saynote" id="sayNote"></div>
   </div>
 
   <!-- TIMELINE (light) -->
@@ -170,6 +232,14 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
     <div class="q" id="t2q"></div>
     <div class="src" id="t2src"></div>
   </div>
+  <div id="replyArea">
+    <div class="replyhead">Answer <span id="replyName">your cat</span>, honestly. Play a cue, then say if they reacted:</div>
+    <div class="cues" id="replyCues"></div>
+    <div class="react hidden" id="reactPrompt">
+      <div class="rq">Did <span id="reactName">your cat</span> react to that?</div>
+      <div class="rb"><button class="yes" onclick="App.reacted(1)">Yes, reacted</button><button class="no" onclick="App.reacted(0)">No response</button></div>
+    </div>
+  </div>
   <div id="labelArea" class="hidden">
     <div class="note" style="margin-top:16px">What did they want? Teach Pawlogue this sound:</div>
     <div class="chips" id="chips"></div>
@@ -184,6 +254,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 <!-- NAV -->
 <div class="nav">
   <button class="active" id="nav-listen" onclick="App.go('listen')"><span class="ic">🎧</span>Listen</button>
+  <button id="nav-talk" onclick="App.go('talk')"><span class="ic">💬</span>Talk</button>
   <button id="nav-dict" onclick="App.go('dict')"><span class="ic">📖</span>Dictionary</button>
   <button id="nav-log" onclick="App.go('log')"><span class="ic">🕊</span>Recent</button>
 </div>
@@ -199,6 +270,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 </div>
 
 <script src="audio.js"></script>
+<script src="talk.js"></script>
 <script src="app.js"></script>
 <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}</script>
 </body>
