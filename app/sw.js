@@ -1,6 +1,8 @@
 /* Pawlogue service worker: offline app shell. Bump CACHE to invalidate. */
-var CACHE='pawlogue-v3';
-var ASSETS=['./','index.html','app.js','audio.js','talk.js','manifest.json','icon-192.png','icon-512.png'];
+var CACHE='pawlogue-v4';
+var ASSETS=['./','index.html','app.js','audio.js','talk.js','manifest.json','icon-192.png','icon-512.png',
+  'sounds/purr1.mp3','sounds/purr2.mp3','sounds/purr3.mp3','sounds/trill1.mp3','sounds/trill2.mp3','sounds/trill3.mp3',
+  'sounds/meow1.mp3','sounds/meow2.mp3','sounds/meow3.mp3','sounds/meow4.mp3'];
 self.addEventListener('install',function(e){
   self.skipWaiting();
   e.waitUntil(caches.open(CACHE).then(function(c){return c.addAll(ASSETS).catch(function(){});}));

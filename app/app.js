@@ -34,8 +34,13 @@ var App=(function(){
     openDB();
     if(!pet){ showWizard('species'); }
     else setPet(pet);
-    buildChips(); renderDict(); renderLog(); renderBaseDict(); buildCues('talkCues'); buildCues('replyCues');
+    buildChips(); renderDict(); renderLog(); renderBaseDict(); renderTips(); buildCues('talkCues'); buildCues('replyCues');
+    var si=$('sayInput'); if(si) si.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); sayParse(); } });
   }
+  function renderTips(){var el=$('tipsList');if(!el)return;el.innerHTML='';
+    PawTalk.TIPS.forEach(function(t){var d=document.createElement('div');d.className='tip';
+      d.innerHTML='<div class="ti">'+t.icon+'</div><div><div class="tt">'+t.title+'</div><div class="tb">'+t.body+'</div></div>';
+      el.appendChild(d);});}
   function setText(id,t){var e=$(id);if(e)e.textContent=t;}
   function showWizard(step){$('petModal').classList.remove('hidden');
     ['species','name','trial'].forEach(function(s){$('step-'+s).classList.toggle('hidden',s!==step);});}
@@ -169,11 +174,12 @@ var App=(function(){
     $('reactPrompt').classList.add('hidden'); $('reactPrompt2').classList.add('hidden');
     buildCues('talkCues'); buildCues('replyCues');
     toast(yes?'Logged. Nice 🐾':'Logged, no response.');}
-  function sayParse(){var t=$('sayInput').value||'';
+  function sayParse(){var t=($('sayInput').value||'').trim();
+    if(!t){$('sayTokens').innerHTML='';$('sayNote').textContent='Type a few words first, like "come here" or "dinner time".';return;}
     allProto().then(function(ps){
       var labels=ps.map(function(p){return p.label;});
       var toks=PawTalk.decompose(t,pet,labels), box=$('sayTokens'); box.innerHTML='';
-      if(!toks.length){$('sayNote').textContent='';return;}
+      if(!toks.length){$('sayNote').textContent='Type a few words first.';return;}
       var unknown=0,known=0;
       toks.forEach(function(tk){var s=document.createElement('span');
         var cls=tk.known?(tk.src==='taught'?'taught':'known'):'unknown';

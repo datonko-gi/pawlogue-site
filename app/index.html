@@ -175,7 +175,11 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 .bdcard .dl{font-weight:700;font-size:15px;display:flex;align-items:center;gap:9px}
 .dot.base{background:var(--amber)}
 .bdcard .dm{font-size:12.5px;color:var(--mut);margin-top:3px}
-.seclabel{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);font-weight:700;margin:16px 0 10px}
+.seclabel{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);font-weight:700;margin:22px 0 10px}
+.tip{display:flex;gap:13px;background:var(--ink2);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:10px}
+.tip .ti{font-size:24px;line-height:1.1;flex-shrink:0}
+.tip .tt{font-weight:700;font-size:15px;margin-bottom:3px}
+.tip .tb{font-size:13.5px;color:var(--mut);line-height:1.5}
 </style>
 </head>
 <body>
@@ -211,7 +215,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   <!-- TALK (human -> cat, honest cues) -->
   <div class="view hidden" id="view-talk">
     <div class="h2">Talk to <span id="talkName">your cat</span></div>
-    <div class="sub">Play a cue your cat responds to, then tell Pawlogue if they reacted. It learns what works on your cat.</div>
+    <div class="sub">Tap a sound or word to play it, then tell Pawlogue if your cat reacted. Every press is a little different, like a real voice.</div>
     <div class="cues" id="talkCues"></div>
     <div class="react hidden" id="reactPrompt2">
       <div class="rq">Did <span class="rnm">your cat</span> react to that?</div>
@@ -225,6 +229,9 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
     </div>
     <div class="tokens" id="sayTokens"></div>
     <div class="saynote" id="sayNote"></div>
+    <div class="seclabel">Ways to bond, no app needed</div>
+    <div class="sub" style="margin-bottom:10px">Some of the best ways to "talk" to your cat are things you do, not sounds to play.</div>
+    <div id="tipsList"></div>
   </div>
 
   <!-- TIMELINE (light) -->
