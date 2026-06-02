@@ -12,7 +12,7 @@
   var vIdx={};  // per-cue variant cursor (cycles)
 
   var CUES=[
-    {id:'purr', label:'Purr (мррхрр)', icon:'😻', kind:'audio',
+    {id:'purr', label:'Purr (mrrrr)', icon:'😻', kind:'audio',
       clips:['purr1.mp3','purr2.mp3','purr3.mp3','purr4.mp3','purr5.mp3','purr6.mp3'],
       basis:'Real, calm cat purrs. A warm, friendly opener your cat relaxes to.'},
     {id:'trill', label:'Trill / chirp', icon:'🎵', kind:'audio',
