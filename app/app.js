@@ -20,14 +20,14 @@ var App=(function(){
   }
   function demoListen(){
     if(!engineReady){ toast('Model still loading, one sec'); return; }
-    $('hint').textContent='Demo: reading a real sample meow...';
+    toast('Reading a real sample meow...');
     fetch('sounds/meow2.mp3').then(function(r){return r.arrayBuffer();}).then(function(ab){
       var AC=window.AudioContext||window.webkitAudioContext, ac=new AC(); return ac.decodeAudioData(ab.slice(0));
     }).then(function(buf){
       last={pcm:buf.getChannelData(0).slice(),sampleRate:buf.sampleRate,vector:null,isDemo:true};
       return PawEngine.analyze(last.pcm,last.sampleRate);
-    }).then(function(eng){ $('hint').textContent='On-device and honest. We read mood, never fake words.'; showResultReal(eng,last); })
-      .catch(function(){ $('hint').textContent='Demo unavailable. Use the Listen button.'; });
+    }).then(function(eng){ showResultReal(eng,last); })
+      .catch(function(){ toast('Demo unavailable, try Start watching.'); });
   }
   // shareable photo card of the current result (DECISIONS: photo share = branded result card)
   function _mark(x,bx,by,s){var hs=[8,20,13,17],cols=['#E8A657','#f0c389','#2D8B7A','#E8A657'];
@@ -114,7 +114,7 @@ var App=(function(){
   function deleteAllData(){ if(!confirm('Delete everything Pawlogue stored on this device? Your pet, taught sounds, clips and settings will be erased.'))return;
     try{localStorage.clear();}catch(_){} try{indexedDB.deleteDatabase('pawlogue');}catch(_){} setTimeout(function(){location.reload();},150); }
   function saveConsent(){consent.ts=Date.now(); localStorage.setItem('paw_consent',JSON.stringify(consent));
-    var n=pendingName||pet||'Milo'; setPet(n); localStorage.setItem('paw_onboarded','1'); $('petModal').classList.add('hidden'); toast('Welcome, '+n+' 🐾'); go('listen');}
+    var n=pendingName||pet||'Milo'; setPet(n); localStorage.setItem('paw_onboarded','1'); $('petModal').classList.add('hidden'); toast('Welcome, '+n+' 🐾'); go('live');}
   function pickSpecies(s){species=s;localStorage.setItem('paw_species',s);
     var w=s==='dog'?'dog':'cat';
     setText('nameTitle','What is your '+w+"'s name?");
@@ -126,21 +126,80 @@ var App=(function(){
   function setPet(n){pet=n;localStorage.setItem('paw_pet',n);localStorage.setItem('paw_species',species);
     $('petName').textContent=n;$('petName2').textContent=n;
     $('petEmoji').textContent=(species==='dog'?'🐶 ':'🐱 ');
-    $('moodline').textContent='Tap to hear what '+n+' is saying';
-    $('dictTitle').textContent=n+"'s vocabulary";
+    setText('dictTitle',n+"'s vocabulary");
+    setText('liveName',n);setText('liveGuessName',n);setText('clipsName',n);
     setText('talkName',n);setText('replyName',n);setText('reactName',n);setText('taughtName',n);
     var rn=document.querySelectorAll('.rnm');for(var i=0;i<rn.length;i++)rn[i].textContent=n;
     buildCues('talkCues');}
   function editPet(){pendingName=pet;$('petInput').value=pet;showWizard('name');}
 
   function go(v){
-    if(v!=='video' && typeof PawVideo!=='undefined'){ try{PawVideo.stopCamera();}catch(_){} resetVideoPanels(); }
-    ['listen','talk','video','dict','log'].forEach(function(x){$('view-'+x).classList.toggle('hidden',x!==v);$('nav-'+x).classList.toggle('active',x===v);});
-    if(v==='dict'){renderDict();renderBaseDict();} if(v==='log')renderLog();
+    if(v!=='live' && typeof PawVideo!=='undefined'){ try{PawVideo.stopCamera();}catch(_){} }
+    ['live','talk','dict','clips'].forEach(function(x){var el=$('view-'+x);if(el)el.classList.toggle('hidden',x!==v);var nb=$('nav-'+x);if(nb)nb.classList.toggle('active',x===v);});
+    if(v==='dict'){renderDict();renderBaseDict();}
+    if(v==='clips'){ renderClips(); renderLog(); }
     if(v==='talk'){refreshVoiceBank().then(function(){buildCues('talkCues');});$('reactPrompt2').classList.add('hidden');renderTips(true);}
-    if(v==='video'){ resetVideoPanels(); renderClips(); }}
-  function resetVideoPanels(){ vidCameraOn=false; var s=$('vidStart'),l=$('vidLive'),r=$('vidResult'); if(s)s.classList.remove('hidden'); if(l)l.classList.add('hidden'); if(r)r.classList.add('hidden'); var b=$('vidRecBtn'); if(b){b.textContent='● Record';b.classList.remove('rec');} }
-  var vidCurrentBlob=null, vidCameraOn=false;
+    if(v==='live'){ liveReset(); }}
+
+  // ---- LIVE: camera + continuous listen + top-3 read + smart capture ----
+  var vidCurrentBlob=null, liveCameraOn=false, liveEvents=0, liveLastEvent=null, liveGuessT=null;
+  function liveReset(){ liveCameraOn=false;
+    var i=$('liveIntro'); if(i)i.classList.remove('hidden');
+    ['liveGuess','liveMeter','liveBar','vidCues'].forEach(function(id){var e=$(id);if(e)e.classList.add('hidden');});
+    var lc=$('liveCount'); if(lc)lc.textContent=''; clearTimeout(liveGuessT); }
+  function startLive(){
+    if(typeof PawVideo==='undefined'){ toast('Live not supported here'); return; }
+    PawVideo.onLevel(liveMeterUpdate);
+    PawVideo.start($('vidcanvas'), onLiveEvent, pet).then(function(){
+      liveCameraOn=true; liveEvents=0;
+      $('liveIntro').classList.add('hidden'); $('liveMeter').classList.remove('hidden'); $('liveBar').classList.remove('hidden');
+      renderLiveCount();
+    }).catch(function(){ liveCamBlocked(); });
+  }
+  function liveCamBlocked(){
+    toast('Camera and microphone needed 🎥');
+    var s=document.querySelector('#liveIntro .lii-sub');
+    if(s)s.innerHTML='Pawlogue needs the camera and mic to watch '+(pet||'your cat')+'. Tap the <b>⋮</b> menu (top right) → <b>Permissions</b> → allow <b>Camera</b> and <b>Microphone</b>, then tap Start watching again.';
+  }
+  function stopLive(){ try{PawVideo.stopCamera();}catch(_){} liveReset(); toast('Paused. Tap Start watching to resume.'); }
+  function liveMeterUpdate(level){ var m=$('liveMeter'); if(!m||m.classList.contains('hidden'))return; var b=m.children;
+    for(var i=0;i<b.length;i++){ var k=Math.abs(i-3)/3; var h=6+level*26*(1-0.45*k); b[i].style.height=Math.max(5,Math.min(30,h))+'px'; } }
+  function confShort(p){ return p>0.6?'likely':(p>0.32?'maybe':'a guess'); }
+  function onLiveEvent(ev){
+    liveLastEvent=ev; var box=$('lgChips'); if(!box)return; box.innerHTML='';
+    setText('liveGuessName',(pet||'Your cat'));
+    (ev.top3||[]).forEach(function(c){ var b=document.createElement('button');
+      b.innerHTML='<span>'+(DICT_EMOJI[c.id]||'🐱')+'</span><span>'+c.label+'</span><span class="lgpct">'+confShort(c.prob||0)+'</span>';
+      b.onclick=function(){ liveConfirm(c.label, ev); }; box.appendChild(b); });
+    $('liveGuess').classList.remove('hidden');
+    var t0=ev.top3&&ev.top3[0];
+    logResult({soundType:t0?t0.label:'sound', affect:ev.result.affect, emoji:(t0?DICT_EMOJI[t0.id]:'🐾')||'🐾', confidence:ev.result.confidence});
+    liveEvents++; renderLiveCount();
+    PawVideo.captureClip(6).then(function(r){ if(r&&r.blob){ addVideo({blob:r.blob,thumb:r.thumb,dur:r.dur,t:Date.now(),label:(t0?t0.label:'')}); } });
+    clearTimeout(liveGuessT); liveGuessT=setTimeout(function(){ var g=$('liveGuess'); if(g)g.classList.add('hidden'); }, 9000);
+  }
+  function liveConfirm(label, ev){
+    var g=$('liveGuess'); if(g)g.classList.add('hidden'); clearTimeout(liveGuessT);
+    try{ if(ev&&ev.audio){ var wav=float32ToWav(ev.audio, ev.sampleRate); addProto({label:label,vector:null,blob:wav,ts:Date.now(),src:'live'}).then(function(){ refreshVoiceBank(); }); } }catch(_){}
+    toast('Saved. '+(pet||'your cat')+'’s "'+label+'" added 🐾');
+  }
+  function liveOther(){ var box=$('lgChips'); if(!box)return; box.innerHTML='';
+    setText('liveGuessName','Pick what '+(pet||'your cat')+' meant');
+    (DICT_CLASSES||[]).forEach(function(c){ var b=document.createElement('button');
+      b.innerHTML='<span>'+(DICT_EMOJI[c.id]||'🐱')+'</span><span>'+c.label+'</span>';
+      b.onclick=function(){ liveConfirm(c.label, liveLastEvent); }; box.appendChild(b); }); }
+  function liveTalk(){ buildVidCues(); var c=$('vidCues'); if(c) c.classList.toggle('hidden'); }
+  function liveShareLast(){ if(typeof PawVideo!=='undefined' && PawVideo.hasClip()){ if(PawVideo.canNativeShare()) PawVideo.share(); else { PawVideo.save(); toast('Clip saved. Pick it in TikTok or Instagram.'); } } else { toast('No clip yet. One saves when '+(pet||'your cat')+' vocalizes.'); } }
+  function renderLiveCount(){ var el=$('liveCount'); if(!el)return; el.textContent = liveEvents
+    ? ('Heard '+liveEvents+' sound'+(liveEvents>1?'s':'')+'. Tap a guess to teach '+(pet||'your cat')+'.')
+    : 'Listening. '+(pet||'your cat')+'’s sounds pop up here the moment they happen.'; }
+  // encode the captured PCM window to a WAV blob for the dictionary / his-voice bank
+  function float32ToWav(pcm, sr){ sr=sr||44100; var n=pcm.length, buf=new ArrayBuffer(44+n*2), v=new DataView(buf);
+    function ws(o,s){for(var i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i));}
+    ws(0,'RIFF'); v.setUint32(4,36+n*2,true); ws(8,'WAVE'); ws(12,'fmt '); v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true);
+    v.setUint32(24,sr,true); v.setUint32(28,sr*2,true); v.setUint16(32,2,true); v.setUint16(34,16,true); ws(36,'data'); v.setUint32(40,n*2,true);
+    for(var i=0;i<n;i++){ var s=Math.max(-1,Math.min(1,pcm[i])); v.setInt16(44+i*2, s<0?s*0x8000:s*0x7FFF, true); }
+    return new Blob([buf],{type:'audio/wav'}); }
   var SOCIALS=[{id:'TikTok',ic:'🎵',url:'https://www.tiktok.com/upload'},{id:'Instagram',ic:'📸',url:'https://www.instagram.com/'},{id:'YouTube',ic:'▶️',url:'https://www.youtube.com/upload'},{id:'Facebook',ic:'📘',url:'https://www.facebook.com/'},{id:'Share',ic:'⬆️',url:''}];
   function buildVidCues(){var c=$('vidCues');if(!c||typeof PawTalk==='undefined')return;c.innerHTML='';
     PawTalk.CUES.forEach(function(q){var b=document.createElement('button');b.className='vidcue';b.textContent=q.icon+' '+q.label;b.onclick=function(){PawVideo.playCue(q.id,pet);};c.appendChild(b);});}
@@ -181,7 +240,8 @@ var App=(function(){
       });
     }); }
   function playClip(id){ allVideos().then(function(vs){ var v=null; vs.forEach(function(x){if(x.id===id)v=x;}); if(!v)return;
-    vidCurrentBlob=v.blob; $('vidPlayback').src=URL.createObjectURL(v.blob); $('vidStart').classList.add('hidden'); $('vidLive').classList.add('hidden'); $('vidResult').classList.remove('hidden'); buildVidSocial(); }); }
+    vidCurrentBlob=v.blob; var p=$('vidPlayback'); if(p){ p.classList.remove('hidden'); p.src=URL.createObjectURL(v.blob); try{p.scrollIntoView({behavior:'smooth',block:'center'});}catch(_){}}
+    var soc=$('vidSocial'); if(soc){ soc.classList.remove('hidden'); buildVidSocial(); } }); }
 
   // ---- recording ----
   function toggleRec(){ recording?stop():start(); }
@@ -430,6 +490,6 @@ var App=(function(){
     for(var i=0;i<bars.length;i++){var v=data[i*step]/255;bars[i].style.height=(6+v*40)+'px';}}
 
   return {init:init,editPet:editPet,savePet:savePet,pickSpecies:pickSpecies,toggleConsent:toggleConsent,saveConsent:saveConsent,startTrial:startTrial,demoListen:demoListen,shareCard:shareCard,openSettings:openSettings,closeSettings:closeSettings,toggleConsent2:toggleConsent2,deleteAllData:deleteAllData,go:go,toggleRec:toggleRec,startTeach:startTeach,closeSheet:closeSheet,reacted:reacted,sayParse:sayParse,saveVoice:saveVoice,answerBack:answerBack,
-    vidStart:vidStart,vidToggleRec:vidToggleRec,vidReadCat:vidReadCat,vidToggleCues:vidToggleCues,vidSave:vidSave,vidNewClip:vidNewClip};
+    startLive:startLive,stopLive:stopLive,liveOther:liveOther,liveTalk:liveTalk,liveShareLast:liveShareLast};
 })();
 document.addEventListener('DOMContentLoaded',App.init);

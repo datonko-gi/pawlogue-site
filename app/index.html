@@ -212,8 +212,29 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 .tip .tt{font-weight:700;font-size:15px;margin-bottom:3px}
 .tip .tb{font-size:13.5px;color:var(--mut);line-height:1.5}
 /* video mode */
-.vstage{position:relative;width:100%;max-width:340px;margin:10px auto 14px;aspect-ratio:9/16;border-radius:18px;overflow:hidden;background:#0e0c0a;border:1px solid var(--line)}
+.vstage{position:relative;width:100%;max-width:360px;margin:6px auto 12px;aspect-ratio:9/16;border-radius:18px;overflow:hidden;background:#0e0c0a;border:1px solid var(--line)}
 .vstage canvas{width:100%;height:100%;display:block;object-fit:cover}
+/* Live overlays */
+.liveIntro{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:26px;background:radial-gradient(120% 80% at 50% 30%,#1a1510,#100d0b)}
+.lii-emoji{font-size:52px;margin-bottom:8px}
+.lii-title{font-family:var(--serif);font-size:27px;letter-spacing:-.01em;margin-bottom:10px}
+.lii-sub{color:var(--dim);font-size:14.5px;line-height:1.5;margin-bottom:20px;max-width:280px}
+.lii-btn{background:var(--amber);color:#1a1206;border:none;font-family:inherit;font-weight:700;font-size:16px;padding:15px 28px;border-radius:14px;cursor:pointer}
+.lii-btn:active{transform:scale(.97)}
+.lii-fine{color:var(--mut);font-size:11.5px;margin-top:18px;max-width:260px}
+.liveMeter{position:absolute;left:0;right:0;bottom:14px;display:flex;align-items:center;justify-content:center;gap:4px;height:30px;pointer-events:none}
+.liveMeter span{width:5px;height:6px;border-radius:3px;background:rgba(242,232,213,.85);transition:height .08s linear}
+.liveGuess{position:absolute;left:12px;right:12px;bottom:14px;background:rgba(18,16,14,.92);border:1px solid var(--line);border-radius:16px;padding:14px;backdrop-filter:blur(6px)}
+.lgq{font-size:13px;color:var(--mut);margin-bottom:10px;text-align:center}
+.lgchips{display:flex;flex-direction:column;gap:8px}
+.lgchips button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--ink3);border:1px solid var(--line);color:var(--cream);font-family:inherit;font-weight:600;font-size:15px;padding:13px 15px;border-radius:12px;cursor:pointer}
+.lgchips button:active{border-color:var(--amber)}
+.lgchips button .lgpct{margin-left:auto;font-size:12px;color:var(--mut);font-weight:600}
+.lgother{display:block;width:100%;margin-top:10px;background:transparent;border:none;color:var(--mut);font-family:inherit;font-size:13px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.liveBar{display:flex;gap:10px;max-width:360px;margin:0 auto}
+.liveBar .lb{flex:1;background:transparent;color:var(--cream);border:1px solid var(--line);font-family:inherit;font-weight:600;font-size:13.5px;padding:12px 6px;border-radius:13px;cursor:pointer}
+.liveBar .lb:active{border-color:var(--amber)}
+.livecount{text-align:center;color:var(--mut);font-size:13px;margin:12px auto 0;max-width:360px}
 .vidrow{display:flex;gap:10px;margin-top:6px}
 .vidrow .btn{flex:1;text-align:center;border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:15px;padding:14px;border-radius:13px;background:var(--amber);color:#1a1206}
 .vidrow .btn.ghost{background:transparent;color:var(--cream);border:1px solid var(--line)}
@@ -243,46 +264,32 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
     </div>
   </div>
 
-  <!-- LISTEN -->
-  <div class="view" id="view-listen">
-    <div class="center">
-      <div class="moodline" id="moodline">Tap to hear what your pet is saying</div>
-      <div class="recwrap">
-        <div class="ring" id="ring"></div>
-        <button class="recbtn" id="recbtn" onclick="App.toggleRec()">Listen</button>
+  <!-- LIVE (home): camera + continuous listen + top-3 read + smart capture -->
+  <div class="view" id="view-live">
+    <div class="vstage" id="liveStage">
+      <canvas id="vidcanvas"></canvas>
+      <div class="liveMeter hidden" id="liveMeter"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+      <div class="liveGuess hidden" id="liveGuess">
+        <div class="lgq"><span id="liveGuessName">Your cat</span> just sounded like</div>
+        <div class="lgchips" id="lgChips"></div>
+        <button class="lgother" onclick="App.liveOther()">✎ Something else</button>
       </div>
-      <div class="wave" id="wave" aria-hidden="true"></div>
-      <div class="hint" id="hint">On-device and honest. We read mood, never fake words.</div>
-      <button class="demobtn" id="demoBtn" onclick="App.demoListen()">▶ Hear a sample read (no cat needed)</button>
-      <button class="saybtn" onclick="App.go('talk')">💬 Say something to your cat</button>
-    </div>
-  </div>
-
-  <!-- VIDEO -->
-  <div class="view hidden" id="view-video">
-    <div class="h2">Film the conversation</div>
-    <div class="sub">Turn your speaker up. Record your cat, tap "Cat said?" to read it, answer with a cue, and the whole exchange is baked into the clip with the Pawlogue mark. Then share.</div>
-    <div class="vstage"><canvas id="vidcanvas"></canvas></div>
-    <div id="vidStart"><button class="btn" style="width:100%;border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:16px;padding:14px;border-radius:13px;background:var(--amber);color:#1a1206" onclick="App.vidStart()">Start camera</button>
-      <p class="sub" style="margin-top:10px">Cats first. Your video never leaves your phone unless you share it.</p></div>
-    <div id="vidLive" class="hidden">
-      <div class="vidrow"><button class="btn" id="vidRecBtn" onclick="App.vidToggleRec()">● Record</button></div>
-      <div class="vidrow">
-        <button class="btn ghost" onclick="App.vidReadCat()">🎧 Listen</button>
-        <button class="btn ghost" onclick="App.vidToggleCues()">💬 Say to cat</button>
-      </div>
-      <div class="vidcues hidden" id="vidCues"></div>
-    </div>
-    <div id="vidResult" class="hidden">
-      <video id="vidPlayback" controls playsinline style="width:100%;max-width:340px;display:block;margin:0 auto 12px;border-radius:14px"></video>
-      <div class="seclabel" style="text-align:center">Post it</div>
-      <div class="social" id="vidSocial"></div>
-      <div class="vidrow" style="margin-top:6px">
-        <button class="btn ghost" onclick="App.vidSave()">Save to device</button>
-        <button class="btn ghost" onclick="App.vidNewClip()">New clip</button>
+      <div class="liveIntro" id="liveIntro">
+        <div class="lii-emoji">🐱</div>
+        <div class="lii-title">Watch <span id="liveName">your cat</span> live</div>
+        <div class="lii-sub">Point the camera at your cat. Pawlogue listens the whole time and reads each sound the moment it happens. Nothing to press, no waiting.</div>
+        <button class="lii-btn" onclick="App.startLive()">📹 Start watching</button>
+        <button class="demobtn" onclick="App.demoListen()">▶ See a sample read first</button>
+        <p class="lii-fine">Cats first. Your video stays on your phone unless you share it.</p>
       </div>
     </div>
-    <div id="vidGallery"></div>
+    <div class="liveBar hidden" id="liveBar">
+      <button class="lb" onclick="App.liveTalk()">💬 Talk back</button>
+      <button class="lb" onclick="App.liveShareLast()">↗ Share last</button>
+      <button class="lb" onclick="App.stopLive()">⏸ Pause</button>
+    </div>
+    <div class="livecount" id="liveCount"></div>
+    <div class="vidcues hidden" id="vidCues"></div>
   </div>
 
   <!-- DICTIONARY -->
@@ -319,10 +326,14 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
     <div id="tipsList"></div>
   </div>
 
-  <!-- TIMELINE (light) -->
-  <div class="view hidden" id="view-log">
-    <div class="h2">Recent</div>
-    <div class="sub">Your last listens. Stored only on this device.</div>
+  <!-- CLIPS: auto-captured moments + read history -->
+  <div class="view hidden" id="view-clips">
+    <div class="h2">Clips</div>
+    <div class="sub">Moments Pawlogue captured when <span id="clipsName">your cat</span> vocalized. Tap to play, share to TikTok or Instagram, long-press to delete.</div>
+    <div id="vidGallery"></div>
+    <video id="vidPlayback" controls playsinline class="hidden" style="width:100%;max-width:340px;display:block;margin:12px auto;border-radius:14px"></video>
+    <div class="social hidden" id="vidSocial"></div>
+    <div class="seclabel">Recent reads</div>
     <div id="logList"></div>
   </div>
 </div>
@@ -357,11 +368,10 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 
 <!-- NAV -->
 <div class="nav">
-  <button class="active" id="nav-listen" onclick="App.go('listen')"><span class="ic">🎧</span>Listen</button>
+  <button class="active" id="nav-live" onclick="App.go('live')"><span class="ic">📹</span>Live</button>
   <button id="nav-talk" onclick="App.go('talk')"><span class="ic">💬</span>Talk</button>
-  <button id="nav-video" onclick="App.go('video')"><span class="ic">🎥</span>Video</button>
   <button id="nav-dict" onclick="App.go('dict')"><span class="ic">📖</span>Dictionary</button>
-  <button id="nav-log" onclick="App.go('log')"><span class="ic">🕊</span>Recent</button>
+  <button id="nav-clips" onclick="App.go('clips')"><span class="ic">🎬</span>Clips</button>
 </div>
 
 <div class="toast" id="toast"></div>

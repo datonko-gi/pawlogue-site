@@ -10,6 +10,9 @@
   var ac, ring, ringLen, ringPos=0, srcNode, proc, zero;
   var caps=[];                        // captions: {who,text,born}
   var recording=false, recStart=0;
+  // continuous-listen onset detection (no "press and wait"): a cheap energy gate fires the
+  // real model only when the cat actually vocalizes. onEvent gets the top-3 + the audio window.
+  var onEvent=null, levelCb=null, baseline=0.012, lastTrigEnd=0, pendingAt=0, reading=false, COOL=2600, lastPet='';
   // playful-but-truthful caption voice (a mood gloss of the REAL detected class, not a fake quote)
   var VIBE={Content:'totally chill 😌', Angry:'absolutely FURIOUS 😾', Defense:'on guard, backing off',
     Fighting:'throwing paws 🥊', Warning:'final warning, human 😼', Mating:'yowling for a mate 🌙',
@@ -21,8 +24,9 @@
     return '';
   }
 
-  function start(canvasEl){
+  function start(canvasEl, onEventCb, petName){
     canvas=canvasEl; canvas.width=W; canvas.height=H; cctx=canvas.getContext('2d');
+    onEvent=onEventCb||null; lastPet=petName||''; pendingAt=0; reading=false; lastTrigEnd=0; baseline=0.012;
     return navigator.mediaDevices.getUserMedia({
       video:{ facingMode:'environment', width:{ideal:1280}, height:{ideal:720} },
       audio:{ echoCancellation:false, noiseSuppression:false, autoGainControl:false }
@@ -30,13 +34,20 @@
       stream=st;
       video=document.createElement('video'); video.muted=true; video.playsInline=true; video.setAttribute('playsinline','');
       video.srcObject=st; return video.play().then(function(){
-        // rolling PCM buffer for "cat said?"
+        // rolling PCM buffer + cheap energy gate for continuous listening
         try{
           ac=new (window.AudioContext||window.webkitAudioContext)(); if(ac.state==='suspended')ac.resume();
           ringLen=Math.floor(ac.sampleRate*2.5); ring=new Float32Array(ringLen);
           srcNode=ac.createMediaStreamSource(st);
           proc=ac.createScriptProcessor(4096,1,1);
-          proc.onaudioprocess=function(e){ var d=e.inputBuffer.getChannelData(0); for(var i=0;i<d.length;i++){ ring[ringPos]=d[i]; ringPos=(ringPos+1)%ringLen; } };
+          proc.onaudioprocess=function(e){ var d=e.inputBuffer.getChannelData(0); var s=0;
+            for(var i=0;i<d.length;i++){ ring[ringPos]=d[i]; ringPos=(ringPos+1)%ringLen; s+=d[i]*d[i]; }
+            var rms=Math.sqrt(s/d.length); baseline=baseline*0.97+rms*0.03;
+            if(onEvent){ var now=performance.now();
+              if(now-lastTrigEnd>COOL && !reading && !pendingAt && rms>0.015 && rms>baseline*3.2){ pendingAt=now+460; }
+              if(levelCb)levelCb(Math.min(1,rms*7));
+            }
+          };
           zero=ac.createGain(); zero.gain.value=0; srcNode.connect(proc); proc.connect(zero); zero.connect(ac.destination);
         }catch(_){}
         drawLoop();
@@ -44,6 +55,21 @@
       });
     });
   }
+  // fires the real model only on an onset, then hands the top-3 + audio window to onEvent
+  function doAutoRead(){
+    if(reading||typeof PawEngine==='undefined'||!PawEngine._ready||!ac){ lastTrigEnd=performance.now(); return; }
+    reading=true; var buf=readBuffer(), sr=ac.sampleRate;
+    PawEngine.analyze(buf, sr).then(function(r){
+      reading=false; lastTrigEnd=performance.now();
+      if(!r||!r.isCat) return;                       // non-cat noise: stay quiet, no spam
+      var top3=(r.soundClasses||[]).slice(0,3);
+      if(top3[0]) caption('cat', VIBE[top3[0].id]||top3[0].label);
+      if(onEvent) onEvent({result:r, top3:top3, audio:buf, sampleRate:sr});
+    }).catch(function(){ reading=false; lastTrigEnd=performance.now(); });
+  }
+  // record a short captioned clip (caption already baked via the canvas) for smart-capture
+  function captureClip(sec){ if(recording) return Promise.resolve(null); startRec();
+    return new Promise(function(res){ setTimeout(function(){ stopRec().then(res); }, Math.max(2,(sec||6))*1000); }); }
 
   function coverDraw(){
     var vw=video.videoWidth||1280, vh=video.videoHeight||720;
@@ -88,7 +114,9 @@
     var s=Math.floor((performance.now()-recStart)/1000), mm=String(Math.floor(s/60)).padStart(2,'0'), ss=String(s%60).padStart(2,'0');
     cctx.fillText('REC '+mm+':'+ss, 62, 63); cctx.restore();
   }
-  function drawLoop(){ if(!cctx)return; try{ coverDraw(); }catch(_){ cctx.fillStyle='#12100E'; cctx.fillRect(0,0,W,H); } watermark(); drawCaps(); recDot(); raf=requestAnimationFrame(drawLoop); }
+  function drawLoop(){ if(!cctx)return; try{ coverDraw(); }catch(_){ cctx.fillStyle='#12100E'; cctx.fillRect(0,0,W,H); } watermark(); drawCaps(); recDot();
+    if(pendingAt && performance.now()>=pendingAt && !reading){ pendingAt=0; doAutoRead(); }
+    raf=requestAnimationFrame(drawLoop); }
 
   function caption(who,text){ caps.push({who:who,text:text,born:performance.now()}); }
 
@@ -150,7 +178,8 @@
     cctx=null; caps=[];
   }
 
-  global.PawVideo={ start:start, startRec:startRec, stopRec:stopRec, readCat:readCat, playCue:playCue,
+  global.PawVideo={ start:start, startRec:startRec, stopRec:stopRec, readCat:readCat, playCue:playCue, captureClip:captureClip,
     caption:caption, share:share, save:save, canNativeShare:canNativeShare, stopCamera:stopCamera,
+    onLevel:function(cb){ levelCb=cb; }, audioWindow:function(){ return ac?{audio:readBuffer(),sampleRate:ac.sampleRate}:null; },
     isRecording:function(){return recording;}, hasClip:function(){return !!lastBlob;}, lastBlob:function(){return lastBlob;} };
 })(window);
