@@ -125,7 +125,8 @@
     var s=Math.floor((performance.now()-recStart)/1000), mm=String(Math.floor(s/60)).padStart(2,'0'), ss=String(s%60).padStart(2,'0');
     cctx.fillText('REC '+mm+':'+ss, 62, 63); cctx.restore();
   }
-  function drawLoop(){ if(!cctx)return; try{ coverDraw(); }catch(_){ cctx.fillStyle='#12100E'; cctx.fillRect(0,0,W,H); } watermark(); drawCaps(); recDot();
+  function drawLoop(){ if(!cctx)return; try{ coverDraw(); }catch(_){ cctx.fillStyle='#12100E'; cctx.fillRect(0,0,W,H); }
+    if(recording){ watermark(); drawCaps(); recDot(); }   // brand+captions bake ONLY into the saved clip; live preview stays clean
     if(pendingAt && performance.now()>=pendingAt && !reading){ pendingAt=0; doAutoRead(); }
     raf=requestAnimationFrame(drawLoop); }
 

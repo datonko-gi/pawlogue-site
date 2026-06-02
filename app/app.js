@@ -145,7 +145,7 @@ var App=(function(){
   var vidCurrentBlob=null, liveCameraOn=false, liveEvents=0, liveLastEvent=null, liveGuessT=null;
   function liveReset(){ liveCameraOn=false;
     var i=$('liveIntro'); if(i)i.classList.remove('hidden');
-    ['liveGuess','liveMeter','liveBar','vidCues'].forEach(function(id){var e=$(id);if(e)e.classList.add('hidden');});
+    ['liveGuess','liveMeter','liveBar','answerPanel','vidCues'].forEach(function(id){var e=$(id);if(e)e.classList.add('hidden');});
     var lc=$('liveCount'); if(lc)lc.textContent=''; clearTimeout(liveGuessT); }
   function startLive(){
     if(typeof PawVideo==='undefined'){ toast('Live not supported here'); return; }
@@ -153,6 +153,7 @@ var App=(function(){
     PawVideo.start($('vidcanvas'), onLiveEvent, pet).then(function(){
       liveCameraOn=true; liveEvents=0;
       $('liveIntro').classList.add('hidden'); $('liveMeter').classList.remove('hidden'); $('liveBar').classList.remove('hidden');
+      var ap=$('answerPanel'); if(ap){ ap.classList.remove('hidden'); var al=$('apLabel'); if(al)al.textContent='Answer '+(pet||'your cat')+' with a real cat sound'; }
       renderLiveCount();
     }).catch(function(){ liveCamBlocked(); });
   }
@@ -166,18 +167,32 @@ var App=(function(){
     for(var i=0;i<b.length;i++){ var k=Math.abs(i-3)/3; var h=6+level*26*(1-0.45*k); b[i].style.height=Math.max(5,Math.min(30,h))+'px'; } }
   function confShort(p){ return p>0.6?'likely':(p>0.32?'maybe':'a guess'); }
   function liveReadNow(){ if(typeof PawVideo==='undefined'||!liveCameraOn){ toast('Tap Start watching first'); return; } PawVideo.readNow(); }
+  // play a real recorded cat sound: general clip at first, more of THIS cat's own voice as it grows
+  function blendedPlay(id){ var bank=voiceBank[id]||[], n=bank.length;
+    if(n && Math.random() < n/(n+4)){ var i=(vbIdx[id]||0); vbIdx[id]=i+1; playBlob(bank[i%n].blob); return true; }
+    if(typeof PawTalk!=='undefined') PawTalk.play(id, pet); return false; }
+  // answer the cat from the Live screen with a real cat sound, and capture the exchange as a shareable clip
+  function liveAnswer(id){
+    if(!liveCameraOn){ toast('Tap Start watching first'); return; }
+    var own=blendedPlay(id); var q=(typeof PawTalk!=='undefined')?PawTalk.cue(id):null; var lbl=q?q.label:id;
+    toast('Played '+lbl+(own?(' ('+(pet||'your cat')+"'s own voice)"):''));
+    if(typeof PawVideo!=='undefined'){ PawVideo.caption('you', lbl);
+      if(!PawVideo.isRecording()){ PawVideo.captureClip(5).then(function(r){ if(r&&r.blob) addVideo({blob:r.blob,thumb:r.thumb,dur:r.dur,t:Date.now(),label:'you: '+lbl}); renderClips&&renderClips(); }); } }
+  }
   function onLiveEvent(ev){
     liveLastEvent=ev; var box=$('lgChips'); if(!box)return;
     var t0=ev.top3&&ev.top3[0];
     if(ev.forced && (!ev.result || !ev.result.isCat || !t0)){
-      setText('liveGuessName','No clear cat sound that time');
+      setText('lgq','No clear cat sound that time');
       box.innerHTML='<div style="color:var(--mut);font-size:13px;padding:6px 2px;text-align:center">Point a bit closer and tap <b>Read now</b> right when '+(pet||'your cat')+' vocalizes.</div>';
       $('liveGuess').classList.remove('hidden'); clearTimeout(liveGuessT); liveGuessT=setTimeout(function(){var g=$('liveGuess');if(g)g.classList.add('hidden');},6000); return;
     }
     box.innerHTML='';
-    setText('liveGuessName',(pet||'Your cat'));
-    (ev.top3||[]).forEach(function(c){ var b=document.createElement('button');
-      b.innerHTML='<span>'+(DICT_EMOJI[c.id]||'🐱')+'</span><span>'+c.label+'</span><span class="lgpct">'+confShort(c.prob||0)+'</span>';
+    var conf=(t0&&t0.prob)||0;
+    var list=(conf>0.6)? ev.top3.slice(0,1) : ev.top3.slice(0,3);   // confident -> 1 read; unsure -> 2-3
+    setText('lgq', (conf>0.6) ? ((pet||'Your cat')+' sounds '+t0.label.toLowerCase()) : ((pet||'Your cat')+' sounded like one of these. Tap the right one:'));
+    list.forEach(function(c){ var b=document.createElement('button');
+      b.innerHTML='<span>'+(DICT_EMOJI[c.id]||'🐱')+'</span><span class="lgl">'+c.label+'</span>';
       b.onclick=function(){ liveConfirm(c.label, ev); }; box.appendChild(b); });
     $('liveGuess').classList.remove('hidden');
     logResult({soundType:t0?t0.label:'sound', affect:ev.result.affect, emoji:(t0?DICT_EMOJI[t0.id]:'🐾')||'🐾', confidence:ev.result.confidence});
@@ -497,6 +512,6 @@ var App=(function(){
     for(var i=0;i<bars.length;i++){var v=data[i*step]/255;bars[i].style.height=(6+v*40)+'px';}}
 
   return {init:init,editPet:editPet,savePet:savePet,pickSpecies:pickSpecies,toggleConsent:toggleConsent,saveConsent:saveConsent,startTrial:startTrial,demoListen:demoListen,shareCard:shareCard,openSettings:openSettings,closeSettings:closeSettings,toggleConsent2:toggleConsent2,deleteAllData:deleteAllData,go:go,toggleRec:toggleRec,startTeach:startTeach,closeSheet:closeSheet,reacted:reacted,sayParse:sayParse,saveVoice:saveVoice,answerBack:answerBack,
-    startLive:startLive,stopLive:stopLive,liveOther:liveOther,liveTalk:liveTalk,liveShareLast:liveShareLast,liveReadNow:liveReadNow};
+    startLive:startLive,stopLive:stopLive,liveOther:liveOther,liveTalk:liveTalk,liveShareLast:liveShareLast,liveReadNow:liveReadNow,liveAnswer:liveAnswer};
 })();
 document.addEventListener('DOMContentLoaded',App.init);

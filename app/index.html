@@ -222,15 +222,23 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 .lii-btn{background:var(--amber);color:#1a1206;border:none;font-family:inherit;font-weight:700;font-size:16px;padding:15px 28px;border-radius:14px;cursor:pointer}
 .lii-btn:active{transform:scale(.97)}
 .lii-fine{color:var(--mut);font-size:11.5px;margin-top:18px;max-width:260px}
-.liveMeter{position:absolute;left:0;right:0;bottom:14px;display:flex;align-items:center;justify-content:center;gap:4px;height:30px;pointer-events:none}
+.liveMeter{position:absolute;left:0;right:0;bottom:12px;display:flex;align-items:center;justify-content:center;gap:4px;height:26px;pointer-events:none}
 .liveMeter span{width:5px;height:6px;border-radius:3px;background:rgba(242,232,213,.85);transition:height .08s linear}
-.liveGuess{position:absolute;left:12px;right:12px;bottom:14px;background:rgba(18,16,14,.92);border:1px solid var(--line);border-radius:16px;padding:14px;backdrop-filter:blur(6px)}
-.lgq{font-size:13px;color:var(--mut);margin-bottom:10px;text-align:center}
-.lgchips{display:flex;flex-direction:column;gap:8px}
-.lgchips button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--ink3);border:1px solid var(--line);color:var(--cream);font-family:inherit;font-weight:600;font-size:15px;padding:13px 15px;border-radius:12px;cursor:pointer}
-.lgchips button:active{border-color:var(--amber)}
-.lgchips button .lgpct{margin-left:auto;font-size:12px;color:var(--mut);font-weight:600}
-.lgother{display:block;width:100%;margin-top:10px;background:transparent;border:none;color:var(--mut);font-family:inherit;font-size:13px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+/* recognition: compact card at the TOP of the video, horizontal pills, never covers the cat */
+.liveGuess{position:absolute;left:10px;right:10px;top:10px;background:rgba(16,13,11,.9);border:1px solid var(--line);border-radius:14px;padding:10px 11px;backdrop-filter:blur(7px)}
+.lgq{font-size:12.5px;color:var(--cream);margin-bottom:8px;text-align:center;font-weight:600}
+.lgchips{display:flex;flex-direction:row;flex-wrap:wrap;gap:7px;justify-content:center}
+.lgchips button{display:flex;align-items:center;gap:7px;background:var(--ink3);border:1px solid var(--line);color:var(--cream);font-family:inherit;font-weight:600;font-size:14px;padding:9px 13px;border-radius:11px;cursor:pointer}
+.lgchips button:active{border-color:var(--amber);transform:scale(.97)}
+.lgchips button .lgl{white-space:nowrap}
+.lgother{display:block;margin:9px auto 0;background:transparent;border:none;color:var(--mut);font-family:inherit;font-size:12.5px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+/* answer-back panel docked right under the video (thumb zone) */
+.answerPanel{max-width:360px;margin:0 auto 12px}
+.ap-label{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);font-weight:700;text-align:center;margin:2px 0 9px}
+.ap-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.apbtn{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--ink2);border:1px solid var(--line);color:var(--cream);font-family:inherit;font-weight:700;font-size:15px;padding:15px 10px;border-radius:14px;cursor:pointer}
+.apbtn span{font-size:20px;line-height:1}
+.apbtn:active{border-color:var(--amber);transform:scale(.98)}
 .liveBar{display:flex;gap:10px;max-width:360px;margin:0 auto}
 .liveBar .lb{flex:1;background:transparent;color:var(--cream);border:1px solid var(--line);font-family:inherit;font-weight:600;font-size:13.5px;padding:12px 6px;border-radius:13px;cursor:pointer}
 .liveBar .lb:active{border-color:var(--amber)}
@@ -258,7 +266,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 <body>
 <div id="app">
   <div class="topbar">
-    <div class="logo" style="cursor:pointer" onclick="App.go('listen')"><span class="mk"><i></i><i></i><i></i><i></i></span>Pawlogue</div>
+    <div class="logo" style="cursor:pointer" onclick="App.go('live')"><span class="mk"><i></i><i></i><i></i><i></i></span>Pawlogue</div>
     <div style="display:flex;align-items:center;gap:8px">
       <div class="petchip" id="petchip" onclick="App.editPet()"><span id="petEmoji"></span><span id="petName">My pet</span> <span style="color:var(--mut)">▾</span></div>
       <button class="gear" onclick="App.openSettings()" aria-label="Settings">⚙</button>
@@ -271,7 +279,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
       <canvas id="vidcanvas"></canvas>
       <div class="liveMeter hidden" id="liveMeter"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
       <div class="liveGuess hidden" id="liveGuess">
-        <div class="lgq"><span id="liveGuessName">Your cat</span> just sounded like</div>
+        <div class="lgq" id="lgq">Your cat sounded like</div>
         <div class="lgchips" id="lgChips"></div>
         <button class="lgother" onclick="App.liveOther()">✎ Something else</button>
       </div>
@@ -284,9 +292,18 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
         <p class="lii-fine">Cats first. Your video stays on your phone unless you share it.</p>
       </div>
     </div>
+    <div class="answerPanel hidden" id="answerPanel">
+      <div class="ap-label" id="apLabel">Answer your cat with a real cat sound</div>
+      <div class="ap-grid">
+        <button class="apbtn" onclick="App.liveAnswer('purr')"><span>❤️</span>Love you</button>
+        <button class="apbtn" onclick="App.liveAnswer('trill')"><span>😺</span>Good boy</button>
+        <button class="apbtn" onclick="App.liveAnswer('meow')"><span>🍽</span>Let's eat</button>
+        <button class="apbtn" onclick="App.liveAnswer('trill')"><span>👋</span>Come here</button>
+      </div>
+    </div>
     <div class="liveBar hidden" id="liveBar">
       <button class="lb lb-primary" onclick="App.liveReadNow()">🔎 Read now</button>
-      <button class="lb" onclick="App.liveTalk()">💬 Talk</button>
+      <button class="lb" onclick="App.liveTalk()">💬 More</button>
       <button class="lb" onclick="App.stopLive()">⏸ Pause</button>
     </div>
     <div class="livecount" id="liveCount"></div>
