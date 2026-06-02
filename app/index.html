@@ -234,6 +234,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 .liveBar{display:flex;gap:10px;max-width:360px;margin:0 auto}
 .liveBar .lb{flex:1;background:transparent;color:var(--cream);border:1px solid var(--line);font-family:inherit;font-weight:600;font-size:13.5px;padding:12px 6px;border-radius:13px;cursor:pointer}
 .liveBar .lb:active{border-color:var(--amber)}
+.liveBar .lb-primary{background:var(--amber);color:#1a1206;border-color:var(--amber);font-weight:700}
 .livecount{text-align:center;color:var(--mut);font-size:13px;margin:12px auto 0;max-width:360px}
 .vidrow{display:flex;gap:10px;margin-top:6px}
 .vidrow .btn{flex:1;text-align:center;border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:15px;padding:14px;border-radius:13px;background:var(--amber);color:#1a1206}
@@ -284,8 +285,8 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
       </div>
     </div>
     <div class="liveBar hidden" id="liveBar">
-      <button class="lb" onclick="App.liveTalk()">💬 Talk back</button>
-      <button class="lb" onclick="App.liveShareLast()">↗ Share last</button>
+      <button class="lb lb-primary" onclick="App.liveReadNow()">🔎 Read now</button>
+      <button class="lb" onclick="App.liveTalk()">💬 Talk</button>
       <button class="lb" onclick="App.stopLive()">⏸ Pause</button>
     </div>
     <div class="livecount" id="liveCount"></div>

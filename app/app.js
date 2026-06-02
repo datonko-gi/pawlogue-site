@@ -165,14 +165,21 @@ var App=(function(){
   function liveMeterUpdate(level){ var m=$('liveMeter'); if(!m||m.classList.contains('hidden'))return; var b=m.children;
     for(var i=0;i<b.length;i++){ var k=Math.abs(i-3)/3; var h=6+level*26*(1-0.45*k); b[i].style.height=Math.max(5,Math.min(30,h))+'px'; } }
   function confShort(p){ return p>0.6?'likely':(p>0.32?'maybe':'a guess'); }
+  function liveReadNow(){ if(typeof PawVideo==='undefined'||!liveCameraOn){ toast('Tap Start watching first'); return; } PawVideo.readNow(); }
   function onLiveEvent(ev){
-    liveLastEvent=ev; var box=$('lgChips'); if(!box)return; box.innerHTML='';
+    liveLastEvent=ev; var box=$('lgChips'); if(!box)return;
+    var t0=ev.top3&&ev.top3[0];
+    if(ev.forced && (!ev.result || !ev.result.isCat || !t0)){
+      setText('liveGuessName','No clear cat sound that time');
+      box.innerHTML='<div style="color:var(--mut);font-size:13px;padding:6px 2px;text-align:center">Point a bit closer and tap <b>Read now</b> right when '+(pet||'your cat')+' vocalizes.</div>';
+      $('liveGuess').classList.remove('hidden'); clearTimeout(liveGuessT); liveGuessT=setTimeout(function(){var g=$('liveGuess');if(g)g.classList.add('hidden');},6000); return;
+    }
+    box.innerHTML='';
     setText('liveGuessName',(pet||'Your cat'));
     (ev.top3||[]).forEach(function(c){ var b=document.createElement('button');
       b.innerHTML='<span>'+(DICT_EMOJI[c.id]||'🐱')+'</span><span>'+c.label+'</span><span class="lgpct">'+confShort(c.prob||0)+'</span>';
       b.onclick=function(){ liveConfirm(c.label, ev); }; box.appendChild(b); });
     $('liveGuess').classList.remove('hidden');
-    var t0=ev.top3&&ev.top3[0];
     logResult({soundType:t0?t0.label:'sound', affect:ev.result.affect, emoji:(t0?DICT_EMOJI[t0.id]:'🐾')||'🐾', confidence:ev.result.confidence});
     liveEvents++; renderLiveCount();
     PawVideo.captureClip(6).then(function(r){ if(r&&r.blob){ addVideo({blob:r.blob,thumb:r.thumb,dur:r.dur,t:Date.now(),label:(t0?t0.label:'')}); } });
@@ -490,6 +497,6 @@ var App=(function(){
     for(var i=0;i<bars.length;i++){var v=data[i*step]/255;bars[i].style.height=(6+v*40)+'px';}}
 
   return {init:init,editPet:editPet,savePet:savePet,pickSpecies:pickSpecies,toggleConsent:toggleConsent,saveConsent:saveConsent,startTrial:startTrial,demoListen:demoListen,shareCard:shareCard,openSettings:openSettings,closeSettings:closeSettings,toggleConsent2:toggleConsent2,deleteAllData:deleteAllData,go:go,toggleRec:toggleRec,startTeach:startTeach,closeSheet:closeSheet,reacted:reacted,sayParse:sayParse,saveVoice:saveVoice,answerBack:answerBack,
-    startLive:startLive,stopLive:stopLive,liveOther:liveOther,liveTalk:liveTalk,liveShareLast:liveShareLast};
+    startLive:startLive,stopLive:stopLive,liveOther:liveOther,liveTalk:liveTalk,liveShareLast:liveShareLast,liveReadNow:liveReadNow};
 })();
 document.addEventListener('DOMContentLoaded',App.init);

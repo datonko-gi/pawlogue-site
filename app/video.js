@@ -44,7 +44,7 @@
             for(var i=0;i<d.length;i++){ ring[ringPos]=d[i]; ringPos=(ringPos+1)%ringLen; s+=d[i]*d[i]; }
             var rms=Math.sqrt(s/d.length); baseline=baseline*0.97+rms*0.03;
             if(onEvent){ var now=performance.now();
-              if(now-lastTrigEnd>COOL && !reading && !pendingAt && rms>0.015 && rms>baseline*3.2){ pendingAt=now+460; }
+              if(now-lastTrigEnd>COOL && !reading && !pendingAt && rms>0.012 && rms>baseline*2.6){ pendingAt=now+440; }
               if(levelCb)levelCb(Math.min(1,rms*7));
             }
           };
@@ -66,6 +66,17 @@
       if(top3[0]) caption('cat', VIBE[top3[0].id]||top3[0].label);
       if(onEvent) onEvent({result:r, top3:top3, audio:buf, sampleRate:sr});
     }).catch(function(){ reading=false; lastTrigEnd=performance.now(); });
+  }
+  // manual force-read of the current buffer (safety net when the auto-gate misses a meow):
+  // always reports back, even if it is not a clear cat sound, so the app visibly responds.
+  function readNow(){
+    if(reading||typeof PawEngine==='undefined'||!PawEngine._ready||!ac){ if(onEvent)onEvent({result:null,top3:[],audio:null,sampleRate:0,forced:true}); return; }
+    reading=true; var buf=readBuffer(), sr=ac.sampleRate;
+    PawEngine.analyze(buf, sr).then(function(r){ reading=false; lastTrigEnd=performance.now();
+      var top3=(r&&r.soundClasses)?r.soundClasses.slice(0,3):[];
+      if(r&&r.isCat&&top3[0]) caption('cat', VIBE[top3[0].id]||top3[0].label);
+      if(onEvent) onEvent({result:r, top3:top3, audio:buf, sampleRate:sr, forced:true});
+    }).catch(function(){ reading=false; if(onEvent)onEvent({result:null,top3:[],audio:buf,sampleRate:sr,forced:true}); });
   }
   // record a short captioned clip (caption already baked via the canvas) for smart-capture
   function captureClip(sec){ if(recording) return Promise.resolve(null); startRec();
@@ -178,7 +189,7 @@
     cctx=null; caps=[];
   }
 
-  global.PawVideo={ start:start, startRec:startRec, stopRec:stopRec, readCat:readCat, playCue:playCue, captureClip:captureClip,
+  global.PawVideo={ start:start, startRec:startRec, stopRec:stopRec, readCat:readCat, readNow:readNow, playCue:playCue, captureClip:captureClip,
     caption:caption, share:share, save:save, canNativeShare:canNativeShare, stopCamera:stopCamera,
     onLevel:function(cb){ levelCb=cb; }, audioWindow:function(){ return ac?{audio:readBuffer(),sampleRate:ac.sampleRate}:null; },
     isRecording:function(){return recording;}, hasClip:function(){return !!lastBlob;}, lastBlob:function(){return lastBlob;} };
